@@ -1,0 +1,39 @@
+# kakeibo-share（みんなの精算）
+
+家族向けの立替・精算 Web アプリ（MVP 開発中）。
+
+仕様・設計ドキュメントはリポジトリに含めず、手元の `docs/` で管理しています（`.gitignore`）。
+
+## 前提
+
+- Node.js 20+
+- npm（またはお好みのパッケージマネージャ）
+- Supabase プロジェクト（新規作成でも可）
+
+## セットアップ
+
+```bash
+npm install
+cp .env.local.example .env.local
+# .env.local に Supabase の URL / anon key を設定
+```
+
+データベースは Supabase CLI で `supabase link` のうえ `npx supabase db push` でマイグレーションを適用します（手順の詳細は手元の `docs/engineering/supabase-setup.md` があれば参照）。
+
+開発サーバー:
+
+```bash
+npm run dev
+```
+
+## ディレクトリ
+
+| パス | 内容 |
+|------|------|
+| `src/app` | Next.js App Router |
+| `supabase/migrations` | SQL マイグレーション |
+
+## メモ
+
+- 参考用の `sample/` はリポジトリに含めません（手元で管理する場合のみ）。
+- メール確認をオフにするとローカルでのサインアップ検証が楽です（Supabase Dashboard → Authentication）。
