@@ -5,9 +5,10 @@ import { computeGreedySettlementTransfers } from "@/features/settlement/lib/sett
 import { confirmMonthlySettlementAction } from "@/features/settlement/actions/settlement-actions";
 import { createExpenseAction } from "@/features/expenses/actions/expense-actions";
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
-import { ExpenseFeed } from "@/features/expenses/ui/ExpenseFeed";
+import { ExpenseFeedWithMonthFilter } from "@/features/expenses/ui/ExpenseFeedWithMonthFilter";
 import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
 import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
+import { GroupInviteLinkPanel } from "@/features/groups/ui/GroupInviteLinkPanel";
 import { GroupDetailTabs } from "@/features/groups/ui/GroupDetailTabs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { formatYen } from "@/shared/lib/format-yen";
@@ -186,6 +187,8 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
   const dashboardSlot = (
     <div className="flex flex-col gap-8">
+      {membership.role === "owner" ? <GroupInviteLinkPanel groupId={id} /> : null}
+
       <BalanceHero currentUserId={user.id} transfers={transferPreview} nameByUserId={nameById} />
 
       <Link
@@ -283,7 +286,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             description="清潔な状態からはじめられます"
           />
         ) : (
-          <ExpenseFeed
+          <ExpenseFeedWithMonthFilter
             items={unpaidFeedItems}
             groupId={id}
             membersForEdit={membersForExpenseEdit}
@@ -349,7 +352,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             title="精算済みの支出はまだありません"
           />
         ) : (
-          <ExpenseFeed items={settledFeedItems} />
+          <ExpenseFeedWithMonthFilter items={settledFeedItems} />
         )}
       </section>
 
