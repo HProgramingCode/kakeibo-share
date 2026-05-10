@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { signupAction } from "@/features/auth/actions/signup-actions";
+import { AuthInputWithLeadingIcon } from "@/features/auth/ui/AuthInputWithLeadingIcon";
+import { AuthSubmitButton } from "@/features/auth/ui/AuthSubmitButton";
+import { AuthOAuthDivider, AuthPageShell } from "@/features/auth/ui/AuthPageShell";
 import { GoogleSignInButton } from "@/features/auth/ui/GoogleSignInButton";
+import { PasswordInputWithToggle } from "@/features/auth/ui/PasswordInputWithToggle";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
+import { Mail, UserRound } from "lucide-react";
 
 type Props = {
   searchParams?: Promise<{ error?: string; next?: string }>;
@@ -16,27 +21,34 @@ export default async function SignupPage({ searchParams }: Props) {
     next === "/groups" ? "/login" : `/login?next=${encodeURIComponent(next)}`;
 
   return (
-    <div className="card-glass p-7">
-      <header>
-        <h1 className="text-xl font-black tracking-tight text-slate-950">みんなの精算</h1>
-        <h2 className="mt-2 text-lg font-bold tracking-tight text-slate-900">アカウント作成</h2>
-        <p className="mt-2 text-sm text-slate-500">
+    <AuthPageShell>
+      <header className="space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-600/90">
+          みんなの精算
+        </p>
+        <h1 className="text-[1.65rem] font-black leading-tight tracking-tight text-slate-950">アカウント作成</h1>
+        <p className="text-sm leading-relaxed text-slate-500">
           メール確認が有効な場合は、メール内リンク後にログインしてください。
         </p>
       </header>
 
       {error ? (
-        <p className="mt-5 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+        <p className="mt-6 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
           {error}
         </p>
       ) : null}
 
-      <form className={`flex flex-col gap-5 ${error ? "mt-5" : "mt-7"}`} action={signupAction}>
+      <form
+        id="signup-form"
+        className={`flex flex-col gap-6 ${error ? "mt-6" : "mt-8"}`}
+        action={signupAction}
+      >
         <input type="hidden" name="next" value={next} />
         <label className="flex flex-col gap-2 text-sm">
           <span className="font-semibold text-slate-700">表示名</span>
-          <input
-            className="input-field"
+          <AuthInputWithLeadingIcon
+            id="signup-display-name"
+            icon={UserRound}
             type="text"
             name="display_name"
             autoComplete="nickname"
@@ -47,37 +59,39 @@ export default async function SignupPage({ searchParams }: Props) {
         </label>
         <label className="flex flex-col gap-2 text-sm">
           <span className="font-semibold text-slate-700">メール</span>
-          <input className="input-field" type="email" name="email" autoComplete="email" required />
+          <AuthInputWithLeadingIcon icon={Mail} type="email" name="email" autoComplete="email" required />
         </label>
         <label className="flex flex-col gap-2 text-sm">
           <span className="font-semibold text-slate-700">パスワード（8文字以上）</span>
-          <input
-            className="input-field"
-            type="password"
-            name="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-          />
+          <PasswordInputWithToggle name="password" autoComplete="new-password" required minLength={8} />
         </label>
-        <button className="btn-primary w-full" type="submit">
-          作成する
-        </button>
+        <AuthSubmitButton label="作成する" pendingLabel="作成中…" />
       </form>
 
-      <div className="mt-7 flex flex-col gap-4">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-          または
-        </p>
-        <GoogleSignInButton nextPath={next} label="Google で登録" />
+      <AuthOAuthDivider />
+
+      <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
+        Google で登録する場合も、上の表示名がグループ内の名前として使われます。
+      </p>
+
+      <div className="mt-6">
+        <GoogleSignInButton
+          nextPath={next}
+          label="Google で登録"
+          displayNameFormId="signup-form"
+          displayNameFieldId="signup-display-name"
+        />
       </div>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-8 text-center text-sm leading-relaxed text-slate-500">
         すでにアカウントがある場合は{" "}
-        <Link href={loginHref} className="font-semibold text-indigo-600 hover:text-indigo-500">
+        <Link
+          href={loginHref}
+          className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 focus-visible:rounded-sm focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2"
+        >
           ログイン
         </Link>
       </p>
-    </div>
+    </AuthPageShell>
   );
 }

@@ -1,7 +1,8 @@
+import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import Link from "next/link";
 import { createClient } from "@/shared/supabase/server";
 import { EmptyState } from "@/shared/ui/EmptyState";
-import { ChevronRight, UsersRound } from "lucide-react";
+import { ChevronRight, Plus, UsersRound } from "lucide-react";
 import { redirect } from "next/navigation";
 
 type GroupRow = {
@@ -48,21 +49,16 @@ export default async function GroupsPage() {
               </span>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <Link
               href="/groups/new"
-              className="inline-flex min-h-[2.5rem] items-center text-[10px] font-black uppercase tracking-widest leading-none text-indigo-600 opacity-80 transition-opacity hover:opacity-100"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-2xl border border-indigo-200/90 bg-indigo-50/90 px-3.5 text-sm font-semibold text-indigo-800 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-[0.98] motion-reduce:active:scale-100 sm:px-4"
             >
-              作成
+              <Plus className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
+              <span>作成</span>
             </Link>
-            <form action="/logout" method="post" className="inline-flex items-center">
-              <button
-                type="submit"
-                className="inline-flex min-h-[2.5rem] items-center text-[10px] font-black uppercase tracking-widest leading-none text-slate-400 transition-colors hover:text-slate-600 active:scale-95"
-              >
-                ログアウト
-              </button>
-            </form>
+            <span className="h-7 w-px shrink-0 bg-slate-200" aria-hidden />
+            <LogoutConfirmForm />
           </div>
         </div>
       </header>

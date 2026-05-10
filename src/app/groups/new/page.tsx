@@ -1,3 +1,4 @@
+import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import Link from "next/link";
 import { createGroupAction } from "@/features/groups/actions/create-group-action";
 import { FolderKanban } from "lucide-react";
@@ -23,14 +24,10 @@ export default async function NewGroupPage({ searchParams }: Props) {
               </span>
             </div>
           </div>
-          <form action="/logout" method="post">
-            <button
-              type="submit"
-              className="text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-slate-600 active:scale-95"
-            >
-              ログアウト
-            </button>
-          </form>
+          <LogoutConfirmForm
+            buttonClassName="inline-flex min-h-[44px] items-center justify-center rounded-2xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-[0.98] motion-reduce:active:scale-100"
+            showIcon={false}
+          />
         </div>
       </header>
 

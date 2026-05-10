@@ -1,8 +1,9 @@
 "use client";
 
 import { createGroupInviteAction } from "@/features/groups/actions/group-invite-actions";
-import { useState } from "react";
+import { PendingButton } from "@/shared/ui/PendingButton";
 import { Link2 } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   groupId: string;
@@ -53,14 +54,15 @@ export function GroupInviteLinkPanel({ groupId }: Props) {
         </div>
       </div>
       <div className="mt-4 flex flex-col gap-3">
-        <button
+        <PendingButton
           type="button"
           onClick={onCreate}
-          disabled={pending}
+          pending={pending}
+          pendingLabel="発行中…"
           className="btn-primary w-full text-sm disabled:opacity-60"
         >
-          {pending ? "発行中…" : "招待リンクを発行"}
-        </button>
+          招待リンクを発行
+        </PendingButton>
         {url ? (
           <div className="flex flex-col gap-2">
             <textarea

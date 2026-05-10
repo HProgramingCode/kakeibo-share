@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { loginAction } from "@/features/auth/actions/login-actions";
+import { AuthInputWithLeadingIcon } from "@/features/auth/ui/AuthInputWithLeadingIcon";
+import { AuthSubmitButton } from "@/features/auth/ui/AuthSubmitButton";
+import { AuthOAuthDivider, AuthPageShell } from "@/features/auth/ui/AuthPageShell";
 import { GoogleSignInButton } from "@/features/auth/ui/GoogleSignInButton";
+import { PasswordInputWithToggle } from "@/features/auth/ui/PasswordInputWithToggle";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
+import { Mail } from "lucide-react";
 
 type Props = {
   searchParams?: Promise<{ error?: string; next?: string }>;
@@ -16,52 +21,49 @@ export default async function LoginPage({ searchParams }: Props) {
     next === "/groups" ? "/signup" : `/signup?next=${encodeURIComponent(next)}`;
 
   return (
-    <div className="card-glass p-7">
-      <header>
-        <h1 className="text-xl font-black tracking-tight text-slate-950">みんなの精算</h1>
-        <h2 className="mt-2 text-lg font-bold tracking-tight text-slate-900">ログイン</h2>
+    <AuthPageShell>
+      <header className="space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-600/90">
+          みんなの精算
+        </p>
+        <h1 className="text-[1.65rem] font-black leading-tight tracking-tight text-slate-950">ログイン</h1>
+        <p className="text-sm leading-relaxed text-slate-500">家族向けの立替・精算です。</p>
       </header>
 
       {error ? (
-        <p className="mt-5 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+        <p className="mt-6 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
           {error}
         </p>
       ) : null}
 
-      <form className={`flex flex-col gap-5 ${error ? "mt-5" : "mt-7"}`} action={loginAction}>
+      <form className={`flex flex-col gap-6 ${error ? "mt-6" : "mt-8"}`} action={loginAction}>
         <input type="hidden" name="next" value={next} />
         <label className="flex flex-col gap-2 text-sm">
           <span className="font-semibold text-slate-700">メール</span>
-          <input className="input-field" type="email" name="email" autoComplete="email" required />
+          <AuthInputWithLeadingIcon icon={Mail} type="email" name="email" autoComplete="email" required />
         </label>
         <label className="flex flex-col gap-2 text-sm">
           <span className="font-semibold text-slate-700">パスワード</span>
-          <input
-            className="input-field"
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            required
-          />
+          <PasswordInputWithToggle name="password" autoComplete="current-password" required />
         </label>
-        <button className="btn-primary w-full" type="submit">
-          ログイン
-        </button>
+        <AuthSubmitButton label="ログイン" pendingLabel="ログイン中…" />
       </form>
 
-      <div className="mt-7 flex flex-col gap-4">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-          または
-        </p>
+      <AuthOAuthDivider />
+
+      <div className="mt-6">
         <GoogleSignInButton nextPath={next} />
       </div>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-8 text-center text-sm leading-relaxed text-slate-500">
         はじめての方は{" "}
-        <Link href={signupHref} className="font-semibold text-indigo-600 hover:text-indigo-500">
+        <Link
+          href={signupHref}
+          className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 focus-visible:rounded-sm focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2"
+        >
           アカウント作成
         </Link>
       </p>
-    </div>
+    </AuthPageShell>
   );
 }

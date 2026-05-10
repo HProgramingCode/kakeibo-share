@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { OAUTH_SIGNUP_DISPLAY_NAME_COOKIE, OAUTH_SIGNUP_DISPLAY_NAME_MAX } from "@/features/auth/lib/oauth-display-name-cookie";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 
 export async function GET(request: Request) {
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
     },
   );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     return NextResponse.redirect(
@@ -45,5 +46,24 @@ export async function GET(request: Request) {
     );
   }
 
-  return NextResponse.redirect(new URL(next, url.origin));
+  const userId = sessionData.session?.user?.id;
+  const pendingName = cookieStore.get(OAUTH_SIGNUP_DISPLAY_NAME_COOKIE)?.value?.trim();
+  const res = NextResponse.redirect(new URL(next, url.origin));
+  res.cookies.delete(OAUTH_SIGNUP_DISPLAY_NAME_COOKIE);
+
+  if (
+    userId &&
+    pendingName &&
+    pendingName.length <= OAUTH_SIGNUP_DISPLAY_NAME_MAX
+  ) {
+    const { error: profileErr } = await supabase
+      .from("profiles")
+      .update({ display_name: pendingName })
+      .eq("id", userId);
+    if (!profileErr) {
+      await supabase.auth.updateUser({ data: { full_name: pendingName } });
+    }
+  }
+
+  return res;
 }

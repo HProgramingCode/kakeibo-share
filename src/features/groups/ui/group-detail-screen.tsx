@@ -8,12 +8,12 @@ import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-i
 import { ExpenseFeedWithMonthFilter } from "@/features/expenses/ui/ExpenseFeedWithMonthFilter";
 import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
 import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
-import { GroupInviteLinkPanel } from "@/features/groups/ui/GroupInviteLinkPanel";
+import { GroupDetailOverflowMenu } from "@/features/groups/ui/GroupDetailOverflowMenu";
 import { GroupDetailTabs } from "@/features/groups/ui/GroupDetailTabs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { formatYen } from "@/shared/lib/format-yen";
 import { createClient } from "@/shared/supabase/server";
-import { BarChart3, Camera, ChevronRight, History, Landmark, Plus, Users } from "lucide-react";
+import { Camera, History, Landmark, Plus, Users } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 type Props = {
@@ -23,6 +23,7 @@ type Props = {
 
 type MemberRow = {
   user_id: string;
+  role: string;
   profiles: { id: string; display_name: string | null } | null;
 };
 
@@ -106,7 +107,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
   const { data: memberRows, error: mErr } = await supabase
     .from("group_members")
-    .select("user_id, profiles ( id, display_name )")
+    .select("user_id, role, profiles ( id, display_name )")
     .eq("group_id", id);
 
   if (mErr || !memberRows?.length) {
@@ -121,6 +122,13 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
   const { data: groupRow } = await supabase.from("groups").select("name").eq("id", id).maybeSingle();
   const groupLabel = groupRow?.name?.trim() || "Family Room";
+
+  const { data: ownProfile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .maybeSingle();
+  const initialDisplayName = ownProfile?.display_name?.trim() ?? "";
 
   const { data: expenseRows, error: exErr } = await supabase
     .from("expenses")
@@ -180,6 +188,12 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
     label: nameById.get(m.user_id) ?? "（未設定）",
   }));
 
+  const menuMembers = sortedMembers.map((m) => ({
+    user_id: m.user_id,
+    label: nameById.get(m.user_id) ?? "（未設定）",
+    role: (m.role === "owner" ? "owner" : "member") as "owner" | "member",
+  }));
+
   const transferPreview = computeGreedySettlementTransfers(netByUser);
 
   const unpaidFeedItems = toFeedItems(unpaidExpenses, nameById);
@@ -187,35 +201,40 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
   const dashboardSlot = (
     <div className="flex flex-col gap-8">
-      {membership.role === "owner" ? <GroupInviteLinkPanel groupId={id} /> : null}
-
       <BalanceHero currentUserId={user.id} transfers={transferPreview} nameByUserId={nameById} />
 
-      <Link
-        href={`/groups/${id}/charts`}
-        className="group flex items-center gap-4 rounded-[24px] border border-indigo-100 bg-white p-5 shadow-card transition-all duration-200 hover:border-indigo-200 hover:shadow-card-hover active:scale-[0.99]"
-      >
-        <div className="rounded-2xl bg-indigo-50 p-3 text-indigo-600 shadow-inner">
-          <BarChart3 className="h-6 w-6" strokeWidth={1.75} aria-hidden />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Charts</p>
-          <p className="text-sm font-bold text-slate-900">支出の推移を見る</p>
-          <p className="mt-0.5 text-xs text-slate-500">月ごとの合計と累計</p>
-        </div>
-        <ChevronRight
-          className="h-5 w-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5"
-          strokeWidth={1.75}
-          aria-hidden
-        />
-      </Link>
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          type="button"
+          disabled
+          className="flex flex-col items-start space-y-3 rounded-3xl border border-slate-100 bg-white/95 p-5 text-left shadow-card opacity-70 transition-all duration-200 active:scale-95"
+          aria-disabled
+        >
+          <div className="rounded-xl bg-orange-50 p-2.5 text-left shadow-inner">
+            <Camera className="h-5 w-5 text-orange-600" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rapid</p>
+            <p className="text-sm font-bold leading-tight text-slate-800">OCR撮影</p>
+          </div>
+        </button>
+        <a
+          href="#expense-form"
+          className="group flex flex-col items-start space-y-3 rounded-3xl border border-indigo-100 bg-indigo-50/90 p-5 text-left shadow-card transition-all duration-200 hover:border-indigo-200 hover:shadow-card-hover active:scale-95"
+        >
+          <div className="rounded-xl bg-indigo-600 p-2.5 shadow-lg transition-transform group-hover:rotate-12">
+            <Plus className="h-5 w-5 text-white" strokeWidth={2} />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Simple</p>
+            <p className="text-sm font-bold leading-tight text-indigo-900">手入力</p>
+          </div>
+        </a>
+      </div>
 
       <section id="monthly-settle" className="scroll-mt-36 space-y-5">
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">月次精算の確定のみ</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            対象月の未精算支出をまとめて確定（同じ月は1回だけ）
-          </p>
         </div>
         <div className="card-glass p-6">
           <form className="flex flex-col gap-5" action={confirmMonthlySettlementAction}>
@@ -236,38 +255,12 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             >
               確定して記録を締める
             </button>
+            <p className="text-center text-sm leading-relaxed text-slate-500">
+              対象月の未精算支出をまとめて確定します（同じ月は1回だけ）
+            </p>
           </form>
         </div>
       </section>
-
-      <div className="grid grid-cols-2 gap-4">
-        <button
-          type="button"
-          disabled
-          className="flex flex-col items-start space-y-3 rounded-[24px] border-2 border-slate-50 bg-white p-5 text-left shadow-sm opacity-70 transition-all active:scale-95"
-          aria-disabled
-        >
-          <div className="rounded-xl bg-orange-50 p-2.5 text-left shadow-inner">
-            <Camera className="h-5 w-5 text-orange-600" strokeWidth={1.75} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rapid</p>
-            <p className="text-sm font-bold leading-tight text-slate-800">OCR撮影</p>
-          </div>
-        </button>
-        <a
-          href="#expense-form"
-          className="group flex flex-col items-start space-y-3 rounded-[24px] border-2 border-indigo-50 bg-indigo-50 p-5 text-left shadow-sm transition-all hover:border-indigo-100 active:scale-95"
-        >
-          <div className="rounded-xl bg-indigo-600 p-2.5 shadow-lg transition-transform group-hover:rotate-12">
-            <Plus className="h-5 w-5 text-white" strokeWidth={2} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Simple</p>
-            <p className="text-sm font-bold leading-tight text-indigo-900">手入力</p>
-          </div>
-        </a>
-      </div>
 
       <section id="recent-expenses" className="scroll-mt-36 space-y-4">
         <div className="flex items-center justify-between px-1">
@@ -420,14 +413,6 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <form action="/logout" method="post">
-              <button
-                type="submit"
-                className="text-[10px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-slate-600 active:scale-95"
-              >
-                ログアウト
-              </button>
-            </form>
             <Link
               href="/groups"
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 transition-all active:scale-95"
@@ -435,6 +420,12 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             >
               <Users className="h-5 w-5 text-slate-600" strokeWidth={1.75} />
             </Link>
+            <GroupDetailOverflowMenu
+              groupId={id}
+              isOwner={membership.role === "owner"}
+              initialDisplayName={initialDisplayName}
+              members={menuMembers}
+            />
           </div>
         </div>
       </header>

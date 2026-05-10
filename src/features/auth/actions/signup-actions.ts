@@ -1,10 +1,9 @@
 "use server";
 
+import { OAUTH_SIGNUP_DISPLAY_NAME_MAX } from "@/features/auth/lib/oauth-display-name-cookie";
 import { createClient } from "@/shared/supabase/server";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 import { redirect } from "next/navigation";
-
-const DISPLAY_NAME_MAX = 40;
 
 export async function signupAction(formData: FormData) {
   const displayNameRaw = String(formData.get("display_name") ?? "");
@@ -22,10 +21,12 @@ export async function signupAction(formData: FormData) {
     );
   }
 
-  if (displayName.length > DISPLAY_NAME_MAX) {
+  if (displayName.length > OAUTH_SIGNUP_DISPLAY_NAME_MAX) {
     redirect(
       "/signup?error=" +
-        encodeURIComponent(`表示名は${DISPLAY_NAME_MAX}文字以内にしてください`) +
+        encodeURIComponent(
+          `表示名は${OAUTH_SIGNUP_DISPLAY_NAME_MAX}文字以内にしてください`,
+        ) +
         nextQS,
     );
   }

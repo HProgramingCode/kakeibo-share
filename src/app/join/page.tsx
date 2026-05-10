@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthSubmitButton } from "@/features/auth/ui/AuthSubmitButton";
 import { acceptGroupInviteAction } from "@/features/groups/actions/group-invite-actions";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 import { createClient } from "@/shared/supabase/server";
@@ -75,9 +76,11 @@ export default async function JoinPage({ searchParams }: Props) {
       ) : null}
       <form className="mt-7 flex flex-col gap-4" action={acceptGroupInviteAction}>
         <input type="hidden" name="token" value={token} />
-        <button type="submit" className="btn-primary w-full">
-          参加する
-        </button>
+        <AuthSubmitButton
+          label="参加する"
+          pendingLabel="処理中…"
+          className="btn-primary w-full"
+        />
       </form>
     </div>
   );
