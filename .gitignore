@@ -17,12 +17,16 @@
 .vercel
 .turbo
 
+# TypeScript（incremental キャッシュ）
+*.tsbuildinfo
+
 # logs / misc
 npm-debug.log*
 .DS_Store
 
-# supabase CLI の一時ファイル
+# supabase CLI の一時ファイル・ローカル用シークレット（OAuth 等は config.toml の env() 参照）
 supabase/.temp/
+supabase/.env
 
 # IDE・エージェント（デプロイ時は不要、個人環境向け）
 /.vscode/

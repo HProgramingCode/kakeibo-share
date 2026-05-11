@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { OAUTH_SIGNUP_DISPLAY_NAME_COOKIE, OAUTH_SIGNUP_DISPLAY_NAME_MAX } from "@/features/auth/lib/oauth-display-name-cookie";
+import {
+  OAUTH_SIGNUP_DISPLAY_NAME_COOKIE,
+  OAUTH_SIGNUP_DISPLAY_NAME_MAX,
+} from "@/features/auth/lib/oauth-display-name-cookie";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 
 export async function GET(request: Request) {
@@ -31,14 +34,19 @@ export async function GET(request: Request) {
           }>,
         ) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options as Parameters<typeof cookieStore.set>[2]),
+            cookieStore.set(
+              name,
+              value,
+              options as Parameters<typeof cookieStore.set>[2],
+            ),
           );
         },
       },
     },
   );
 
-  const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data: sessionData, error } =
+    await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     return NextResponse.redirect(
@@ -47,7 +55,9 @@ export async function GET(request: Request) {
   }
 
   const userId = sessionData.session?.user?.id;
-  const pendingName = cookieStore.get(OAUTH_SIGNUP_DISPLAY_NAME_COOKIE)?.value?.trim();
+  const pendingName = cookieStore
+    .get(OAUTH_SIGNUP_DISPLAY_NAME_COOKIE)
+    ?.value?.trim();
   const res = NextResponse.redirect(new URL(next, url.origin));
   res.cookies.delete(OAUTH_SIGNUP_DISPLAY_NAME_COOKIE);
 
