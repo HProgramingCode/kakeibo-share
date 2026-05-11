@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { loadGroupDetailPageData } from "@/features/groups/lib/services/group-detail-service";
+import type {
+  ExpenseRow,
+  GroupDetailPageProps,
+} from "@/features/groups/lib/types/group-detail-screen.types";
 import { BalanceHero } from "@/features/settlement/ui/BalanceHero";
 import { computeNetBalancesByUser } from "@/features/settlement/lib/dashboard-balances";
 import { computeGreedySettlementTransfers } from "@/features/settlement/lib/settlement-transfers-preview";
@@ -8,44 +13,13 @@ import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-i
 import { ExpenseFeedWithMonthFilter } from "@/features/expenses/ui/ExpenseFeedWithMonthFilter";
 import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
 import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
-import { GroupDetailOverflowMenu } from "@/features/groups/ui/GroupDetailOverflowMenu";
-import { GroupDetailTabs } from "@/features/groups/ui/GroupDetailTabs";
+import { GroupDetailOverflowMenu } from "@/features/groups/ui/components/GroupDetailOverflowMenu";
+import { GroupDetailTabs } from "@/features/groups/ui/components/GroupDetailTabs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { formatYen } from "@/shared/lib/format-yen";
 import { createClient } from "@/shared/supabase/server";
 import { Camera, History, Landmark, Plus, Users } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
-
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams?: Promise<{ error?: string; settled?: string }>;
-};
-
-type MemberRow = {
-  user_id: string;
-  role: string;
-  profiles: { id: string; display_name: string | null } | null;
-};
-
-type ExpenseRow = {
-  id: string;
-  amount: number;
-  expense_date: string;
-  title: string | null;
-  category: string | null;
-  payer_id: string;
-  status: string;
-  expense_participants: { user_id: string }[] | null;
-};
-
-type BatchRow = {
-  id: string;
-  target_month: string;
-  created_at: string;
-  settlement_transfers:
-    | { from_user_id: string; to_user_id: string; amount: number }[]
-    | null;
-};
 
 function todayJstYmd(): string {
   return new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
@@ -55,7 +29,10 @@ function currentMonthJstYm(): string {
   return todayJstYmd().slice(0, 7);
 }
 
-function toFeedItems(rows: ExpenseRow[], nameById: Map<string, string>): ExpenseFeedItemData[] {
+function toFeedItems(
+  rows: ExpenseRow[],
+  nameById: Map<string, string>,
+): ExpenseFeedItemData[] {
   return rows.map((e) => {
     const base: ExpenseFeedItemData = {
       id: e.id,
@@ -79,7 +56,10 @@ function toFeedItems(rows: ExpenseRow[], nameById: Map<string, string>): Expense
   });
 }
 
-export default async function GroupDetailPage({ params, searchParams }: Props) {
+export default async function GroupDetailPage({
+  params,
+  searchParams,
+}: GroupDetailPageProps) {
   const { id } = await params;
   const sp = await searchParams;
   const queryError = sp?.error;
@@ -94,75 +74,47 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
     redirect("/login");
   }
 
-  const { data: membership, error: memErr } = await supabase
-    .from("group_members")
-    .select("role")
-    .eq("group_id", id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const loadResult = await loadGroupDetailPageData(supabase, {
+    groupId: id,
+    userId: user.id,
+  });
 
-  if (memErr || !membership) {
+  if (loadResult.kind === "not_found") {
     notFound();
   }
 
-  const { data: memberRows, error: mErr } = await supabase
-    .from("group_members")
-    .select("user_id, role, profiles ( id, display_name )")
-    .eq("group_id", id);
-
-  if (mErr || !memberRows?.length) {
+  if (loadResult.kind === "members_error") {
     return (
       <div className="rounded-3xl border border-red-100 bg-red-50/80 p-5 text-sm text-red-800">
-        メンバー情報の読み込みに失敗しました: {mErr?.message}
+        メンバー情報の読み込みに失敗しました: {loadResult.message}
       </div>
     );
   }
 
-  const members = memberRows as unknown as MemberRow[];
-
-  const { data: groupRow } = await supabase.from("groups").select("name").eq("id", id).maybeSingle();
-  const groupLabel = groupRow?.name?.trim() || "Family Room";
-
-  const { data: ownProfile } = await supabase
-    .from("profiles")
-    .select("display_name")
-    .eq("id", user.id)
-    .maybeSingle();
-  const initialDisplayName = ownProfile?.display_name?.trim() ?? "";
-
-  const { data: expenseRows, error: exErr } = await supabase
-    .from("expenses")
-    .select(
-      "id, amount, expense_date, title, category, payer_id, status, expense_participants ( user_id )",
-    )
-    .eq("group_id", id)
-    .order("expense_date", { ascending: false });
-
-  if (exErr) {
+  if (loadResult.kind === "expenses_error") {
     return (
       <div className="rounded-3xl border border-red-100 bg-red-50/80 p-5 text-sm text-red-800">
-        支出の読み込みに失敗しました: {exErr.message}
+        支出の読み込みに失敗しました: {loadResult.message}
       </div>
     );
   }
 
-  const expenses = (expenseRows ?? []) as unknown as ExpenseRow[];
-
-  const { data: batchRows, error: bErr } = await supabase
-    .from("settlement_batches")
-    .select("id, target_month, created_at, settlement_transfers ( from_user_id, to_user_id, amount )")
-    .eq("group_id", id)
-    .order("target_month", { ascending: false });
-
-  if (bErr) {
+  if (loadResult.kind === "batches_error") {
     return (
       <div className="rounded-3xl border border-red-100 bg-red-50/80 p-5 text-sm text-red-800">
-        精算履歴の読み込みに失敗しました: {bErr.message}
+        精算履歴の読み込みに失敗しました: {loadResult.message}
       </div>
     );
   }
 
-  const batches = (batchRows ?? []) as unknown as BatchRow[];
+  const {
+    membershipRole,
+    members,
+    groupLabel,
+    initialDisplayName,
+    expenses,
+    batches,
+  } = loadResult;
 
   const nameById = new Map<string, string>();
   for (const m of members) {
@@ -180,7 +132,10 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
   const netByUser = computeNetBalancesByUser(balancesInput);
 
   const sortedMembers = [...members].sort((a, b) =>
-    (nameById.get(a.user_id) ?? "").localeCompare(nameById.get(b.user_id) ?? "", "ja"),
+    (nameById.get(a.user_id) ?? "").localeCompare(
+      nameById.get(b.user_id) ?? "",
+      "ja",
+    ),
   );
 
   const membersForExpenseEdit = sortedMembers.map((m) => ({
@@ -201,7 +156,11 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
   const dashboardSlot = (
     <div className="flex flex-col gap-8">
-      <BalanceHero currentUserId={user.id} transfers={transferPreview} nameByUserId={nameById} />
+      <BalanceHero
+        currentUserId={user.id}
+        transfers={transferPreview}
+        nameByUserId={nameById}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <button
@@ -214,8 +173,12 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             <Camera className="h-5 w-5 text-orange-600" strokeWidth={1.75} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rapid</p>
-            <p className="text-sm font-bold leading-tight text-slate-800">OCR撮影</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Rapid
+            </p>
+            <p className="text-sm font-bold leading-tight text-slate-800">
+              OCR撮影
+            </p>
           </div>
         </button>
         <a
@@ -226,21 +189,32 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             <Plus className="h-5 w-5 text-white" strokeWidth={2} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Simple</p>
-            <p className="text-sm font-bold leading-tight text-indigo-900">手入力</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">
+              Simple
+            </p>
+            <p className="text-sm font-bold leading-tight text-indigo-900">
+              手入力
+            </p>
           </div>
         </a>
       </div>
 
       <section id="monthly-settle" className="scroll-mt-36 space-y-5">
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">月次精算の確定のみ</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+            月次精算の確定のみ
+          </h2>
         </div>
         <div className="card-glass p-6">
-          <form className="flex flex-col gap-5" action={confirmMonthlySettlementAction}>
+          <form
+            className="flex flex-col gap-5"
+            action={confirmMonthlySettlementAction}
+          >
             <input type="hidden" name="group_id" value={id} />
             <label className="flex min-w-0 flex-col gap-2 text-sm">
-              <span className="font-semibold text-slate-700">対象月（JST）</span>
+              <span className="font-semibold text-slate-700">
+                対象月（JST）
+              </span>
               <input
                 className="input-field"
                 type="month"
@@ -264,7 +238,9 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
       <section id="recent-expenses" className="scroll-mt-36 space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-black text-slate-900">最近の支出一覧</h2>
+          <h2 className="text-base font-black text-slate-900">
+            最近の支出一覧
+          </h2>
           <a
             href="#settled-expenses"
             className="text-[11px] font-black uppercase tracking-widest text-indigo-600 opacity-80 transition-opacity hover:opacity-100"
@@ -274,7 +250,13 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
         </div>
         {unpaidFeedItems.length === 0 ? (
           <EmptyState
-            icon={<Landmark className="h-6 w-6 text-slate-300" strokeWidth={1.5} aria-hidden />}
+            icon={
+              <Landmark
+                className="h-6 w-6 text-slate-300"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+            }
             title="未精算の支出はありません"
             description="清潔な状態からはじめられます"
           />
@@ -293,7 +275,9 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
     <div className="flex flex-col gap-8">
       <section id="expense-form" className="flex scroll-mt-36 flex-col gap-5">
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">支出を追加</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+            支出を追加
+          </h2>
           <p className="mt-1 text-sm text-slate-500">手入力で登録</p>
         </div>
 
@@ -302,7 +286,14 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             <input type="hidden" name="group_id" value={id} />
             <label className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">金額（円）</span>
-              <input className="input-field" type="number" name="amount" min={1} step={1} required />
+              <input
+                className="input-field"
+                type="number"
+                name="amount"
+                min={1}
+                step={1}
+                required
+              />
             </label>
             <label className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">支出日</span>
@@ -316,7 +307,11 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             </label>
             <label className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">摘要</span>
-              <input className="input-field" name="title" placeholder="例: スーパー" />
+              <input
+                className="input-field"
+                name="title"
+                placeholder="例: スーパー"
+              />
             </label>
             <div className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">カテゴリ</span>
@@ -338,10 +333,18 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
   const historySlot = (
     <div className="flex flex-col gap-8">
       <section id="settled-expenses" className="scroll-mt-36 space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">精算済みの支出</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          精算済みの支出
+        </h2>
         {settledFeedItems.length === 0 ? (
           <EmptyState
-            icon={<History className="h-6 w-6 text-slate-300" strokeWidth={1.5} aria-hidden />}
+            icon={
+              <History
+                className="h-6 w-6 text-slate-300"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+            }
             title="精算済みの支出はまだありません"
           />
         ) : (
@@ -350,10 +353,18 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">精算履歴</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          精算履歴
+        </h2>
         {batches.length === 0 ? (
           <EmptyState
-            icon={<History className="h-6 w-6 text-slate-300" strokeWidth={1.5} aria-hidden />}
+            icon={
+              <History
+                className="h-6 w-6 text-slate-300"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+            }
             title="精算履歴はまだありません"
           />
         ) : (
@@ -403,7 +414,9 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
               aria-label="グループ一覧へ"
               className="inline-block rounded-md text-slate-950 no-underline transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
-              <h1 className="text-xl font-black tracking-tight text-slate-950">みんなの精算</h1>
+              <h1 className="text-xl font-black tracking-tight text-slate-950">
+                みんなの精算
+              </h1>
             </Link>
             <div className="mt-0.5 flex items-center gap-1">
               <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
@@ -422,7 +435,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
             </Link>
             <GroupDetailOverflowMenu
               groupId={id}
-              isOwner={membership.role === "owner"}
+              isOwner={membershipRole === "owner"}
               initialDisplayName={initialDisplayName}
               members={menuMembers}
             />
@@ -441,7 +454,11 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
         </p>
       ) : null}
 
-      <GroupDetailTabs dashboard={dashboardSlot} register={registerSlot} history={historySlot} />
+      <GroupDetailTabs
+        dashboard={dashboardSlot}
+        register={registerSlot}
+        history={historySlot}
+      />
     </div>
   );
 }

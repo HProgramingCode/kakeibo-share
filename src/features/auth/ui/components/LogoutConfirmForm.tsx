@@ -1,5 +1,7 @@
 "use client";
 
+import { logoutAction } from "@/features/auth/actions/logout-action";
+import { PendingButton } from "@/shared/ui/PendingButton";
 import { LogOut, X } from "lucide-react";
 import {
   useCallback,
@@ -8,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, useFormStatus } from "react-dom";
 
 type Props = {
   /** トリガー直下のラッパー（例: display 調整） */
@@ -22,6 +24,53 @@ type Props = {
 
 const defaultButtonClass =
   "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-2xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-[0.98] motion-reduce:active:scale-100";
+
+function LogoutFormFields({
+  titleId,
+  onClose,
+}: {
+  titleId: string;
+  onClose: () => void;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <h2 id={titleId} className="text-base font-black text-slate-900">
+          ログアウトしますか？
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={pending}
+          className="shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:pointer-events-none disabled:opacity-50"
+          aria-label="閉じる"
+        >
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+      </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={pending}
+          className="btn-secondary order-2 w-full sm:order-1 sm:w-auto"
+        >
+          キャンセル
+        </button>
+        <PendingButton
+          type="submit"
+          pending={pending}
+          pendingLabel="ログアウト中…"
+          className="btn-primary order-1 w-full sm:order-2 sm:w-auto"
+        >
+          ログアウト
+        </PendingButton>
+      </div>
+    </>
+  );
+}
 
 /**
  * 誤タップ防止のため、POST 前にアプリ内モーダルで確認する。
@@ -77,37 +126,8 @@ export function LogoutConfirmForm({
             paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))",
           }}
         >
-          <div className="mb-5 flex items-start justify-between gap-3">
-            <h2 id={titleId} className="text-base font-black text-slate-900">
-              ログアウトしますか？
-            </h2>
-            <button
-              type="button"
-              onClick={close}
-              className="shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              aria-label="閉じる"
-            >
-              <X className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
-          <form
-            action="/logout"
-            method="post"
-            className="flex flex-col gap-3 sm:flex-row sm:justify-end"
-          >
-            <button
-              type="button"
-              onClick={close}
-              className="btn-secondary order-2 w-full sm:order-1 sm:w-auto"
-            >
-              キャンセル
-            </button>
-            <button
-              type="submit"
-              className="btn-primary order-1 w-full sm:order-2 sm:w-auto"
-            >
-              ログアウト
-            </button>
+          <form action={logoutAction}>
+            <LogoutFormFields titleId={titleId} onClose={close} />
           </form>
         </div>
       </div>

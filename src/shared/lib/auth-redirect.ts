@@ -15,7 +15,10 @@ export function safeAuthRedirectPath(
   if (trimmed.includes("://")) {
     return fallback;
   }
-  if (trimmed.startsWith("/auth/callback")) {
+  if (
+    trimmed.startsWith("/auth/callback") ||
+    trimmed.startsWith("/api/auth/callback")
+  ) {
     return fallback;
   }
   return trimmed;

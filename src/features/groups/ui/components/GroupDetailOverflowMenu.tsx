@@ -2,8 +2,8 @@
 
 import { updateProfileDisplayNameAction } from "@/features/auth/actions/profile-actions";
 import { PendingButton } from "@/shared/ui/PendingButton";
-import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
-import { GroupInviteLinkPanel } from "@/features/groups/ui/GroupInviteLinkPanel";
+import { LogoutConfirmForm } from "@/features/auth/ui/components/LogoutConfirmForm";
+import { GroupInviteLinkPanel } from "@/features/groups/ui/components/GroupInviteLinkPanel";
 import { BarChart3, ChevronRight, MoreVertical, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -81,7 +81,9 @@ export function GroupDetailOverflowMenu({
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
+          style={{
+            paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))",
+          }}
         >
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-6 pb-4 pt-6">
             <h2 id={titleId} className="text-base font-black text-slate-900">
@@ -109,11 +111,19 @@ export function GroupDetailOverflowMenu({
                   className="group flex items-center gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 transition-all hover:border-indigo-200 active:scale-[0.99]"
                 >
                   <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 shadow-inner">
-                    <BarChart3 className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+                    <BarChart3
+                      className="h-5 w-5"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900">支出の推移</p>
-                    <p className="text-xs text-slate-500">月ごとの合計と開始からの平均月額</p>
+                    <p className="text-sm font-bold text-slate-900">
+                      支出の推移
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      月ごとの合計と開始からの平均月額
+                    </p>
                   </div>
                   <ChevronRight
                     className="h-5 w-5 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5"
@@ -179,7 +189,9 @@ export function GroupDetailOverflowMenu({
                 >
                   <input type="hidden" name="group_id" value={groupId} />
                   <label className="flex min-w-0 flex-col gap-2 text-sm">
-                    <span className="font-semibold text-slate-700">グループ内で表示される名前</span>
+                    <span className="font-semibold text-slate-700">
+                      グループ内で表示される名前
+                    </span>
                     <input
                       className="input-field"
                       name="display_name"
@@ -200,7 +212,9 @@ export function GroupDetailOverflowMenu({
                   {nameMessage ? (
                     <p
                       className={
-                        nameMessage === "保存しました" ? "text-sm text-slate-600" : "text-sm text-red-700"
+                        nameMessage === "保存しました"
+                          ? "text-sm text-slate-600"
+                          : "text-sm text-red-700"
                       }
                     >
                       {nameMessage}
@@ -233,7 +247,11 @@ export function GroupDetailOverflowMenu({
         aria-label="その他のメニュー"
         onClick={() => setOpen(true)}
       >
-        <MoreVertical className="h-5 w-5 text-slate-600" strokeWidth={1.75} aria-hidden />
+        <MoreVertical
+          className="h-5 w-5 text-slate-600"
+          strokeWidth={1.75}
+          aria-hidden
+        />
       </button>
       {mounted && open ? createPortal(overlay, document.body) : null}
     </>

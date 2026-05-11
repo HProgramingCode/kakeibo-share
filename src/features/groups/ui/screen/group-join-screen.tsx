@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AuthSubmitButton } from "@/features/auth/ui/AuthSubmitButton";
+import { AuthSubmitButton } from "@/features/auth/ui/components/AuthSubmitButton";
 import { acceptGroupInviteAction } from "@/features/groups/actions/group-invite-actions";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 import { createClient } from "@/shared/supabase/server";
@@ -18,8 +18,13 @@ export default async function JoinPage({ searchParams }: Props) {
     return (
       <div className="card-glass p-7">
         <h1 className="text-xl font-bold text-slate-900">グループに参加</h1>
-        <p className="mt-3 text-sm text-slate-600">招待リンクが無効です（token がありません）。</p>
-        <Link href="/groups" className="mt-6 inline-block font-semibold text-indigo-600">
+        <p className="mt-3 text-sm text-slate-600">
+          招待リンクが無効です（token がありません）。
+        </p>
+        <Link
+          href="/groups"
+          className="mt-6 inline-block font-semibold text-indigo-600"
+        >
           グループ一覧へ
         </Link>
       </div>
@@ -31,7 +36,9 @@ export default async function JoinPage({ searchParams }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const nextJoin = safeAuthRedirectPath(`/join?token=${encodeURIComponent(token)}`);
+  const nextJoin = safeAuthRedirectPath(
+    `/join?token=${encodeURIComponent(token)}`,
+  );
 
   if (!user) {
     const loginHref = `/login?next=${encodeURIComponent(nextJoin)}`;
@@ -39,7 +46,9 @@ export default async function JoinPage({ searchParams }: Props) {
     return (
       <div className="card-glass p-7">
         <h1 className="text-xl font-bold text-slate-900">グループに参加</h1>
-        <p className="mt-3 text-sm text-slate-600">参加するにはログインまたはアカウント作成が必要です。</p>
+        <p className="mt-3 text-sm text-slate-600">
+          参加するにはログインまたはアカウント作成が必要です。
+        </p>
         {err ? (
           <p className="mt-4 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
             {err}
@@ -68,13 +77,18 @@ export default async function JoinPage({ searchParams }: Props) {
   return (
     <div className="card-glass p-7">
       <h1 className="text-xl font-bold text-slate-900">グループに参加</h1>
-      <p className="mt-3 text-sm text-slate-600">招待を承諾すると、このグループのメンバーに追加されます。</p>
+      <p className="mt-3 text-sm text-slate-600">
+        招待を承諾すると、このグループのメンバーに追加されます。
+      </p>
       {err ? (
         <p className="mt-4 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
           {err}
         </p>
       ) : null}
-      <form className="mt-7 flex flex-col gap-4" action={acceptGroupInviteAction}>
+      <form
+        className="mt-7 flex flex-col gap-4"
+        action={acceptGroupInviteAction}
+      >
         <input type="hidden" name="token" value={token} />
         <AuthSubmitButton
           label="参加する"

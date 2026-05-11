@@ -1,7 +1,7 @@
 "use client";
 
 import { setOAuthSignupDisplayNameCookie } from "@/features/auth/actions/oauth-signup-display-name-action";
-import { GoogleMark } from "@/features/auth/ui/GoogleMark";
+import { GoogleMark } from "@/features/auth/ui/components/GoogleMark";
 import { createClient } from "@/shared/supabase/client";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 import { Loader2 } from "lucide-react";
@@ -19,14 +19,21 @@ type Props = {
 function focusDisplayNameField(fieldId: string | undefined) {
   if (!fieldId) return;
   const el = document.getElementById(fieldId);
-  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+  if (
+    el instanceof HTMLInputElement ||
+    el instanceof HTMLTextAreaElement ||
+    el instanceof HTMLSelectElement
+  ) {
     el.focus();
   }
 }
 
 function formatOAuthError(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes("provider is not enabled") || m.includes("unsupported provider")) {
+  if (
+    m.includes("provider is not enabled") ||
+    m.includes("unsupported provider")
+  ) {
     return "この Supabase プロジェクトで Google ログインが無効です。Dashboard → Authentication → Providers → Google を有効化し、Client ID / Secret を保存してください。.env の URL と同じプロジェクトで設定しているか確認してください。";
   }
   return message;
@@ -52,8 +59,11 @@ export function GoogleSignInButton({
           setPending(false);
           return;
         }
-        const displayName = String(new FormData(form).get("display_name") ?? "");
-        const { error: cookieErr } = await setOAuthSignupDisplayNameCookie(displayName);
+        const displayName = String(
+          new FormData(form).get("display_name") ?? "",
+        );
+        const { error: cookieErr } =
+          await setOAuthSignupDisplayNameCookie(displayName);
         if (cookieErr) {
           setError(cookieErr);
           focusDisplayNameField(displayNameFieldId);
@@ -69,7 +79,7 @@ export function GoogleSignInButton({
       const { error: oauthErr } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/callback?next=${nextQuery}`,
+          redirectTo: `${origin}/api/auth/callback?next=${nextQuery}`,
         },
       });
       if (oauthErr) {
@@ -77,7 +87,9 @@ export function GoogleSignInButton({
         setPending(false);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Google ログインに失敗しました");
+      setError(
+        e instanceof Error ? e.message : "Google ログインに失敗しました",
+      );
       setPending(false);
     }
   }
