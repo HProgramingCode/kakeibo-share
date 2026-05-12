@@ -6,6 +6,7 @@ import {
 } from "@/shared/lib/expense-categories";
 import { redirectGroupDetailWithError } from "@/shared/lib/redirect-group-detail";
 import { createClient } from "@/shared/supabase/server";
+import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -55,10 +56,10 @@ export async function createExpenseAction(formData: FormData) {
   /** 支払者はチェックボックスに無くても恒久的に負担対象に含める */
   const participantIds = [...new Set([payerId, ...checkboxParticipantIds])];
 
-  const { data: membersRaw, error: memErr } = await supabase
-    .from("group_members")
-    .select("user_id")
-    .eq("group_id", groupId);
+  const { data: membersRaw, error: memErr } = await selectGroupMemberUserIds(
+    supabase,
+    groupId,
+  );
 
   const members = membersRaw ?? [];
 
@@ -172,10 +173,10 @@ export async function updateExpenseAction(formData: FormData) {
   /** 支払者はチェックボックスに無くても恒久的に負担対象に含める */
   const participantIds = [...new Set([payerId, ...checkboxParticipantIds])];
 
-  const { data: membersRaw, error: memErr } = await supabase
-    .from("group_members")
-    .select("user_id")
-    .eq("group_id", groupId);
+  const { data: membersRaw, error: memErr } = await selectGroupMemberUserIds(
+    supabase,
+    groupId,
+  );
 
   const members = membersRaw ?? [];
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { loadGroupSpendChartsPageData } from "@/features/groups/lib/services/group-spend-charts-service";
 import type { GroupSpendChartsPageProps } from "@/features/groups/lib/types/group-spend-charts-screen.types";
+import { GroupsDestructiveAlert } from "@/features/groups/components/GroupsDestructiveAlert";
 import { GroupSpendCharts } from "@/features/settlement/ui/GroupSpendCharts";
 import {
   buildMonthlySpendSeries,
@@ -35,18 +36,18 @@ export default async function GroupSpendChartsScreen({
 
   if (loadResult.kind === "members_error") {
     return (
-      <div className="rounded-3xl border border-red-100 bg-red-50/80 p-5 text-sm text-red-800">
+      <GroupsDestructiveAlert>
         メンバー情報の読み込みに失敗しました
         {loadResult.message ? `: ${loadResult.message}` : ""}
-      </div>
+      </GroupsDestructiveAlert>
     );
   }
 
   if (loadResult.kind === "expenses_error") {
     return (
-      <div className="rounded-3xl border border-red-100 bg-red-50/80 p-5 text-sm text-red-800">
+      <GroupsDestructiveAlert>
         支出の読み込みに失敗しました: {loadResult.message}
-      </div>
+      </GroupsDestructiveAlert>
     );
   }
 

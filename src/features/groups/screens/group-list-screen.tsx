@@ -1,5 +1,6 @@
 import { LogoutConfirmForm } from "@/features/auth/ui/components/LogoutConfirmForm";
 import { loadGroupListPageData } from "@/features/groups/lib/services/group-list-service";
+import { GroupsDestructiveAlert } from "@/features/groups/components/GroupsDestructiveAlert";
 import Link from "next/link";
 import { createClient } from "@/shared/supabase/server";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -20,9 +21,9 @@ export default async function GroupsPage() {
 
   if (loadResult.kind === "error") {
     return (
-      <div className="rounded-3xl border border-red-100 bg-red-50/80 p-5 text-sm text-red-800">
+      <GroupsDestructiveAlert>
         読み込みに失敗しました: {loadResult.message}
-      </div>
+      </GroupsDestructiveAlert>
     );
   }
 

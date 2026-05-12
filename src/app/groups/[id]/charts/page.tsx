@@ -1,1 +1,1 @@
-export { default } from "@/features/groups/ui/screen/group-spend-charts-screen";
+export { default } from "@/features/groups/screens/group-spend-charts-screen";

@@ -3,7 +3,7 @@
 import { updateProfileDisplayNameAction } from "@/features/auth/actions/profile-actions";
 import { PendingButton } from "@/shared/ui/PendingButton";
 import { LogoutConfirmForm } from "@/features/auth/ui/components/LogoutConfirmForm";
-import { GroupInviteLinkPanel } from "@/features/groups/ui/components/GroupInviteLinkPanel";
+import { GroupInviteLinkPanel } from "@/features/groups/components/GroupInviteLinkPanel";
 import { BarChart3, ChevronRight, MoreVertical, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

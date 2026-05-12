@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { guardGroupMembership } from "@/features/groups/lib/group-membership-guard";
 import * as repo from "@/features/groups/lib/repositories/group-detail-repository";
 import type {
   BatchRow,
@@ -14,13 +15,8 @@ export async function loadGroupDetailPageData(
 ): Promise<GroupDetailPageLoadResult> {
   const { groupId, userId } = opts;
 
-  const { data: membership, error: memErr } = await repo.selectMembershipRole(
-    client,
-    groupId,
-    userId,
-  );
-
-  if (memErr || !membership) {
+  const membership = await guardGroupMembership(client, groupId, userId);
+  if (!membership.ok) {
     return { kind: "not_found" };
   }
 

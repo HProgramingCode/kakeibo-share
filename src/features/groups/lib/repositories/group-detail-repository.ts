@@ -13,6 +13,14 @@ export async function selectMembershipRole(
     .maybeSingle();
 }
 
+/** Server Actions で参加者検証に使う（profiles は不要） */
+export async function selectGroupMemberUserIds(
+  client: SupabaseClient,
+  groupId: string,
+) {
+  return client.from("group_members").select("user_id").eq("group_id", groupId);
+}
+
 export async function selectGroupMembersWithProfiles(
   client: SupabaseClient,
   groupId: string,
