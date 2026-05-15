@@ -1,9 +1,9 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
-import { DashboardUnpaidExpensesSection } from "@/features/groups/components/DashboardUnpaidExpensesSection";
-import { ExpenseEntryShortcutGrid } from "@/features/groups/components/ExpenseEntryShortcutGrid";
-import { MonthlySettlementConfirmSection } from "@/features/groups/components/MonthlySettlementConfirmSection";
 import type { TransferPreview } from "@/features/settlement/lib/settlement-transfers-preview";
 import { BalanceHero } from "@/features/settlement/ui/BalanceHero";
+import { DashboardUnpaidExpensesSection } from "./DashboardUnpaidExpensesSection";
+import { ExpenseEntryShortcutGrid } from "./ExpenseEntryShortcutGrid";
+import { MonthlySettlementConfirmSection } from "./MonthlySettlementConfirmSection";
 
 type Props = {
   groupId: string;

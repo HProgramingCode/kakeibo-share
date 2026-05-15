@@ -1,4 +1,4 @@
-import type { BatchRow } from "@/features/groups/lib/types/group-detail-screen.types";
+import type { BatchRow } from "@/features/groups/group-detail/lib/types";
 import { formatYen } from "@/shared/lib/format-yen";
 
 type Props = {

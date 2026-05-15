@@ -1,8 +1,5 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
-import type {
-  ExpenseRow,
-  MemberRow,
-} from "@/features/groups/lib/types/group-detail-screen.types";
+import type { ExpenseRow, MemberRow } from "./types";
 import {
   computeNetBalancesByUser,
   type ExpenseForBalance,

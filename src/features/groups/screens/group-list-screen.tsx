@@ -1,6 +1,6 @@
-import { LogoutConfirmForm } from "@/features/auth/ui/components/LogoutConfirmForm";
+import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import { loadGroupListPageData } from "@/features/groups/lib/services/group-list-service";
-import { GroupsDestructiveAlert } from "@/features/groups/components/GroupsDestructiveAlert";
+import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
 import Link from "next/link";
 import { createClient } from "@/shared/supabase/server";
 import { EmptyState } from "@/shared/ui/EmptyState";

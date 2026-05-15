@@ -1,5 +1,5 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
-import { ExpenseFeedWithMonthFilter } from "@/features/expenses/ui/ExpenseFeedWithMonthFilter";
+import { ExpenseFeed } from "@/features/expenses/ui/ExpenseFeed";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { Landmark } from "lucide-react";
 
@@ -34,8 +34,8 @@ export function DashboardUnpaidExpensesSection({
           description="清潔な状態からはじめられます"
         />
       ) : (
-        <ExpenseFeedWithMonthFilter
-          items={items}
+        <ExpenseFeed
+          items={items.slice(0, 3)}
           groupId={groupId}
           membersForEdit={membersForEdit}
         />

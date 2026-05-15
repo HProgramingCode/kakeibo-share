@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { GroupDetailMenuMember } from "@/features/groups/components/GroupDetailOverflowMenu";
-import { GroupDetailOverflowMenu } from "@/features/groups/components/GroupDetailOverflowMenu";
+import type { GroupDetailMenuMember } from "./GroupDetailOverflowMenu";
+import { GroupDetailOverflowMenu } from "./GroupDetailOverflowMenu";
 import { Users } from "lucide-react";
 
 type Props = {

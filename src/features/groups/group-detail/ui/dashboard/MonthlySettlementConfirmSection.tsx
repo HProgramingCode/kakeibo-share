@@ -1,4 +1,5 @@
 import { confirmMonthlySettlementAction } from "@/features/settlement/actions/settlement-actions";
+import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
 
 type Props = {
   groupId: string;
@@ -29,12 +30,11 @@ export function MonthlySettlementConfirmSection({
               defaultValue={defaultTargetMonth}
             />
           </label>
-          <button
-            type="submit"
+          <FormSubmitButton
+            label="確定して記録を締める"
+            pendingLabel="確定中..."
             className="w-full rounded-[24px] bg-slate-950 py-6 text-xs font-black uppercase tracking-[0.2em] text-white shadow-2xl transition-all active:scale-[0.98]"
-          >
-            確定して記録を締める
-          </button>
+          />
           <p className="text-center text-sm leading-relaxed text-slate-500">
             対象月の未精算支出をまとめて確定します（同じ月は1回だけ）
           </p>

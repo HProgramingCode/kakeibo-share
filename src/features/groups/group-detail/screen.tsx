@@ -2,16 +2,16 @@ import {
   buildGroupDetailViewModel,
   currentMonthJstYm,
   todayJstYmd,
-} from "@/features/groups/lib/group-detail-screen-view-model";
-import { loadGroupDetailPageData } from "@/features/groups/lib/services/group-detail-service";
-import type { GroupDetailPageProps } from "@/features/groups/lib/types/group-detail-screen.types";
-import { GroupDetailDashboardPanel } from "@/features/groups/components/GroupDetailDashboardPanel";
-import { GroupDetailFlashAlerts } from "@/features/groups/components/GroupDetailFlashAlerts";
-import { GroupDetailHistoryPanel } from "@/features/groups/components/GroupDetailHistoryPanel";
-import { GroupDetailScreenHeader } from "@/features/groups/components/GroupDetailScreenHeader";
-import { GroupDetailTabs } from "@/features/groups/components/GroupDetailTabs";
-import { GroupExpenseCreateSection } from "@/features/groups/components/GroupExpenseCreateSection";
-import { GroupsDestructiveAlert } from "@/features/groups/components/GroupsDestructiveAlert";
+} from "./lib/view-model";
+import { loadGroupDetailPageData } from "./lib/service";
+import type { GroupDetailPageProps } from "./lib/types";
+import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
+import { GroupDetailDashboardPanel } from "./ui/dashboard/GroupDetailDashboardPanel";
+import { GroupDetailFlashAlerts } from "./ui/GroupDetailFlashAlerts";
+import { GroupDetailHistoryPanel } from "./ui/history/GroupDetailHistoryPanel";
+import { GroupDetailScreenHeader } from "./ui/header/GroupDetailScreenHeader";
+import { GroupDetailTabs } from "./ui/GroupDetailTabs";
+import { GroupExpenseCreateSection } from "./ui/GroupExpenseCreateSection";
 import { createClient } from "@/shared/supabase/server";
 import { notFound, redirect } from "next/navigation";
 

@@ -1,6 +1,7 @@
 import { createExpenseAction } from "@/features/expenses/actions/expense-actions";
 import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
 import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
+import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
 
 type Props = {
   groupId: string;
@@ -15,6 +16,8 @@ export function GroupExpenseCreateSection({
   membersForEdit,
   defaultExpenseDate,
 }: Props) {
+  const clientRequestId = crypto.randomUUID();
+
   return (
     <div className="flex flex-col gap-8">
       <section id="expense-form" className="flex scroll-mt-36 flex-col gap-5">
@@ -28,6 +31,7 @@ export function GroupExpenseCreateSection({
         <div className="card-glass p-6">
           <form className="flex flex-col gap-5" action={createExpenseAction}>
             <input type="hidden" name="group_id" value={groupId} />
+            <input type="hidden" name="client_request_id" value={clientRequestId} />
             <label className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">金額（円）</span>
               <input
@@ -65,9 +69,7 @@ export function GroupExpenseCreateSection({
               members={membersForEdit}
               initialPayerId={currentUserId}
             />
-            <button type="submit" className="btn-primary w-full">
-              登録
-            </button>
+            <FormSubmitButton label="登録" pendingLabel="登録中..." />
           </form>
         </div>
       </section>

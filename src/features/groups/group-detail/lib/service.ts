@@ -7,7 +7,7 @@ import type {
   ExpenseRow,
   GroupDetailPageLoadResult,
   MemberRow,
-} from "@/features/groups/lib/types/group-detail-screen.types";
+} from "./types";
 
 export async function loadGroupDetailPageData(
   client: SupabaseClient,

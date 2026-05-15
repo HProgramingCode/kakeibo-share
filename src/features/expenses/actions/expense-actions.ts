@@ -16,6 +16,11 @@ export async function createExpenseAction(formData: FormData) {
     redirect("/groups");
   }
 
+  const clientRequestId = String(formData.get("client_request_id") ?? "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clientRequestId)) {
+    redirectGroupDetailWithError(groupId, "支出登録の送信情報が不正です。もう一度お試しください。");
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -87,6 +92,7 @@ export async function createExpenseAction(formData: FormData) {
       expense_date: expenseDate,
       title,
       category,
+      client_request_id: clientRequestId,
       status: "unpaid",
     })
     .select("id")
@@ -94,6 +100,10 @@ export async function createExpenseAction(formData: FormData) {
 
   const newExpenseId = inserted?.id;
   if (insErr || newExpenseId == null) {
+    if (insErr?.code === "23505") {
+      revalidatePath(`/groups/${groupId}`, "page");
+      return;
+    }
     redirectGroupDetailWithError(groupId, insErr?.message ?? "支出の保存に失敗しました。");
   }
 
@@ -109,8 +119,7 @@ export async function createExpenseAction(formData: FormData) {
     redirectGroupDetailWithError(groupId, partErr.message ?? "負担メンバーの保存に失敗しました。");
   }
 
-  revalidatePath(`/groups/${groupId}`);
-  redirect(`/groups/${groupId}`);
+  revalidatePath(`/groups/${groupId}`, "page");
 }
 
 export async function updateExpenseAction(formData: FormData) {
@@ -230,6 +239,5 @@ export async function updateExpenseAction(formData: FormData) {
     redirectGroupDetailWithError(groupId, partErr.message ?? "負担メンバーの保存に失敗しました。");
   }
 
-  revalidatePath(`/groups/${groupId}`);
-  redirect(`/groups/${groupId}`);
+  revalidatePath(`/groups/${groupId}`, "page");
 }

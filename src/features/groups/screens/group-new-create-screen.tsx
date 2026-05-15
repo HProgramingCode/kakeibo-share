@@ -1,7 +1,8 @@
-import { LogoutConfirmForm } from "@/features/auth/ui/components/LogoutConfirmForm";
-import Link from "next/link";
+import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import { createGroupAction } from "@/features/groups/actions/create-group-action";
+import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
 import { FolderKanban } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   searchParams?: Promise<{ error?: string }>;
@@ -65,9 +66,7 @@ export default async function NewGroupPage({ searchParams }: Props) {
             />
           </label>
           <div className="flex flex-wrap gap-3">
-            <button className="btn-primary" type="submit">
-              作成
-            </button>
+            <FormSubmitButton label="作成" pendingLabel="作成中..." className="btn-primary" />
             <Link href="/groups" className="btn-secondary">
               戻る
             </Link>

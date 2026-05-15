@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { loadGroupSpendChartsPageData } from "@/features/groups/lib/services/group-spend-charts-service";
 import type { GroupSpendChartsPageProps } from "@/features/groups/lib/types/group-spend-charts-screen.types";
-import { GroupsDestructiveAlert } from "@/features/groups/components/GroupsDestructiveAlert";
+import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
 import { GroupSpendCharts } from "@/features/settlement/ui/GroupSpendCharts";
 import {
   buildMonthlySpendSeries,

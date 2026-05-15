@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { AuthSubmitButton } from "@/features/auth/ui/components/AuthSubmitButton";
 import { acceptGroupInviteAction } from "@/features/groups/actions/group-invite-actions";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
+import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
 import { createClient } from "@/shared/supabase/server";
 import { LogIn, UserPlus } from "lucide-react";
 
@@ -90,7 +90,7 @@ export default async function JoinPage({ searchParams }: Props) {
         action={acceptGroupInviteAction}
       >
         <input type="hidden" name="token" value={token} />
-        <AuthSubmitButton
+        <FormSubmitButton
           label="参加する"
           pendingLabel="処理中…"
           className="btn-primary w-full"

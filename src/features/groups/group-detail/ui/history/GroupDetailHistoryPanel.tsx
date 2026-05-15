@@ -1,7 +1,7 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
-import type { BatchRow } from "@/features/groups/lib/types/group-detail-screen.types";
-import { SettlementBatchesList } from "@/features/groups/components/SettlementBatchesList";
-import { SettledExpensesSection } from "@/features/groups/components/SettledExpensesSection";
+import type { BatchRow } from "@/features/groups/group-detail/lib/types";
+import { SettlementBatchesList } from "./SettlementBatchesList";
+import { SettledExpensesSection } from "./SettledExpensesSection";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { History } from "lucide-react";
 
