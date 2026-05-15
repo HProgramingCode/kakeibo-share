@@ -1,7 +1,6 @@
 "use client";
 
-import { PendingButton } from "@/shared/ui/PendingButton";
-import { useFormStatus } from "react-dom";
+import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
 
 type Props = {
   label: string;
@@ -14,12 +13,7 @@ const authFormClass =
   "btn-primary w-full py-4 text-[0.9375rem] font-bold tracking-tight";
 
 export function AuthSubmitButton({ label, pendingLabel, className }: Props) {
-  const { pending } = useFormStatus();
   const cls = className ?? authFormClass;
 
-  return (
-    <PendingButton type="submit" pending={pending} pendingLabel={pendingLabel} className={cls}>
-      {label}
-    </PendingButton>
-  );
+  return <FormSubmitButton label={label} pendingLabel={pendingLabel} className={cls} />;
 }

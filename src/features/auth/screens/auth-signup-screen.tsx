@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { signupAction } from "@/features/auth/actions/signup-actions";
-import { AuthInputWithLeadingIcon } from "@/features/auth/ui/components/AuthInputWithLeadingIcon";
-import { AuthSubmitButton } from "@/features/auth/ui/components/AuthSubmitButton";
+import { AuthInputWithLeadingIcon } from "@/features/auth/ui/AuthInputWithLeadingIcon";
+import { AuthSubmitButton } from "@/features/auth/ui/AuthSubmitButton";
 import {
   AuthOAuthDivider,
   AuthPageShell,
-} from "@/features/auth/ui/components/AuthPageShell";
-import { GoogleSignInButton } from "@/features/auth/ui/components/GoogleSignInButton";
-import { PasswordInputWithToggle } from "@/features/auth/ui/components/PasswordInputWithToggle";
+} from "@/features/auth/ui/AuthPageShell";
+import { GoogleSignInButton } from "@/features/auth/ui/GoogleSignInButton";
+import { PasswordInputWithToggle } from "@/features/auth/ui/PasswordInputWithToggle";
 import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
 import { Mail, UserRound } from "lucide-react";
 
