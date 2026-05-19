@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { acceptGroupInviteAction } from "@/features/groups/actions/group-invite-actions";
-import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
-import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
-import { createClient } from "@/shared/supabase/server";
+import { groupJoinPathWithToken } from "@/features/groups/lib/group-invite-path";
+import { safeAuthRedirectPath } from "@/lib/auth-redirect";
+import { ROUTES } from "@/lib/routes";
+import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
+import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { createClient } from "@/server/supabase/server";
 import { LogIn, UserPlus } from "lucide-react";
 
 type Props = {
@@ -22,7 +25,7 @@ export default async function JoinPage({ searchParams }: Props) {
           招待リンクが無効です（token がありません）。
         </p>
         <Link
-          href="/groups"
+          href={ROUTES.groups}
           className="mt-6 inline-block font-semibold text-indigo-600"
         >
           グループ一覧へ
@@ -34,11 +37,9 @@ export default async function JoinPage({ searchParams }: Props) {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authRepo.getSessionUser(supabase);
 
-  const nextJoin = safeAuthRedirectPath(
-    `/join?token=${encodeURIComponent(token)}`,
-  );
+  const nextJoin = safeAuthRedirectPath(groupJoinPathWithToken(token));
 
   if (!user) {
     const loginHref = `/login?next=${encodeURIComponent(nextJoin)}`;

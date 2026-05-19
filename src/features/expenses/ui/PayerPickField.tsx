@@ -4,7 +4,7 @@ import {
   computeExpensePickerPortalMenuGeom,
   EXPENSE_PICKER_MENU_PANEL_CLASS,
 } from "@/features/expenses/lib/expense-picker-portal-geometry";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/lib/utils";
 import { Check, ChevronDown } from "lucide-react";
 import {
   useCallback,
@@ -78,7 +78,9 @@ export function PayerPickField({
   const updatePortalGeom = useCallback(() => {
     const el = btnRef.current;
     if (!el) return;
-    setPortalGeom(computeExpensePickerPortalMenuGeom(el.getBoundingClientRect()));
+    setPortalGeom(
+      computeExpensePickerPortalMenuGeom(el.getBoundingClientRect()),
+    );
   }, []);
 
   useLayoutEffect(() => {
@@ -135,7 +137,8 @@ export function PayerPickField({
   }, [open, members, resolvedId]);
 
   const displayLabel =
-    members.find((m) => m.user_id === resolvedId)?.label ?? "メンバーを選んでください";
+    members.find((m) => m.user_id === resolvedId)?.label ??
+    "メンバーを選んでください";
 
   function commitSelection(userId: string) {
     if (!controlled) setInternalId(userId);
@@ -195,7 +198,9 @@ export function PayerPickField({
         aria-activedescendant={`${baseId}-opt-${highlight}`}
         className={cn(
           EXPENSE_PICKER_MENU_PANEL_CLASS,
-          portal ? "fixed" : "absolute left-0 right-0 top-full z-10 mt-1.5 max-h-[min(18rem,calc(100dvh-10rem))] w-full min-w-0",
+          portal
+            ? "fixed"
+            : "absolute left-0 right-0 top-full z-10 mt-1.5 max-h-[min(18rem,calc(100dvh-10rem))] w-full min-w-0",
         )}
         style={
           portal && portalGeom
@@ -219,7 +224,9 @@ export function PayerPickField({
             aria-selected={resolvedId === m.user_id}
             className={cn(
               "flex w-full min-w-0 items-center justify-between gap-2 px-4 py-3 text-left text-sm font-semibold transition-colors",
-              i === highlight ? "bg-indigo-50 text-indigo-950" : "text-slate-800",
+              i === highlight
+                ? "bg-indigo-50 text-indigo-950"
+                : "text-slate-800",
               resolvedId === m.user_id && "text-indigo-700",
             )}
             onMouseEnter={() => setHighlight(i)}
@@ -227,7 +234,11 @@ export function PayerPickField({
           >
             <span className="min-w-0 flex-1 truncate">{m.label}</span>
             {resolvedId === m.user_id ? (
-              <Check className="h-4 w-4 shrink-0 text-indigo-600" strokeWidth={2} aria-hidden />
+              <Check
+                className="h-4 w-4 shrink-0 text-indigo-600"
+                strokeWidth={2}
+                aria-hidden
+              />
             ) : (
               <span className="w-4 shrink-0" aria-hidden />
             )}
@@ -237,7 +248,8 @@ export function PayerPickField({
     );
   }
 
-  const showPortalPanel = portal && mounted && open && portalGeom && members.length > 0;
+  const showPortalPanel =
+    portal && mounted && open && portalGeom && members.length > 0;
   const showAttachedPanel = !portal && open && members.length > 0;
 
   return (
@@ -250,8 +262,16 @@ export function PayerPickField({
       >
         支払者
       </legend>
-      <div className="relative min-w-0" style={{ zIndex: open && !portal ? menuZIndex : undefined }}>
-        <input type="hidden" name={name} value={resolvedId} required={members.length > 0} />
+      <div
+        className="relative min-w-0"
+        style={{ zIndex: open && !portal ? menuZIndex : undefined }}
+      >
+        <input
+          type="hidden"
+          name={name}
+          value={resolvedId}
+          required={members.length > 0}
+        />
         <button
           ref={btnRef}
           type="button"
@@ -266,7 +286,9 @@ export function PayerPickField({
             const next = !open;
             if (next && portal && btnRef.current) {
               setPortalGeom(
-                computeExpensePickerPortalMenuGeom(btnRef.current.getBoundingClientRect()),
+                computeExpensePickerPortalMenuGeom(
+                  btnRef.current.getBoundingClientRect(),
+                ),
               );
             }
             if (!next) {
@@ -287,7 +309,9 @@ export function PayerPickField({
           />
         </button>
         {showAttachedPanel ? renderMenuPanel() : null}
-        {showPortalPanel ? createPortal(renderMenuPanel(), document.body) : null}
+        {showPortalPanel
+          ? createPortal(renderMenuPanel(), document.body)
+          : null}
       </div>
     </fieldset>
   );

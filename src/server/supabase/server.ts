@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-import type { CookieToSet } from "@/shared/supabase/cookie-types";
+import type { CookieToSet } from "@/server/supabase/cookie-types";
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -17,7 +17,11 @@ export async function createClient() {
         setAll(cookiesToSet: CookieToSet[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options as Parameters<typeof cookieStore.set>[2]),
+              cookieStore.set(
+                name,
+                value,
+                options as Parameters<typeof cookieStore.set>[2],
+              ),
             );
           } catch {
             // Server Component の読み取り専用コンテキストでは無視（公式パターン）

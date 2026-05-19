@@ -1,115 +1,17 @@
-import Link from "next/link";
-import { signupAction } from "@/features/auth/actions/signup-actions";
-import { AuthInputWithLeadingIcon } from "@/features/auth/ui/AuthInputWithLeadingIcon";
-import { AuthSubmitButton } from "@/features/auth/ui/AuthSubmitButton";
-import {
-  AuthOAuthDivider,
-  AuthPageShell,
-} from "@/features/auth/ui/AuthPageShell";
-import { GoogleSignInButton } from "@/features/auth/ui/GoogleSignInButton";
-import { PasswordInputWithToggle } from "@/features/auth/ui/PasswordInputWithToggle";
-import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
-import { Mail, UserRound } from "lucide-react";
+import { SignupForm } from "@/features/auth/ui/SignupForm";
+import { AuthPageShell } from "@/features/auth/ui/AuthPageShell";
+import { Suspense } from "react";
 
-type Props = {
-  searchParams?: Promise<{ error?: string; next?: string }>;
-};
-
-export default async function SignupPage({ searchParams }: Props) {
-  const params = await searchParams;
-  const error = params?.error;
-  const next = safeAuthRedirectPath(params?.next);
-
-  const loginHref =
-    next === "/groups" ? "/login" : `/login?next=${encodeURIComponent(next)}`;
-
+export default function SignupPage() {
   return (
-    <AuthPageShell>
-      <header className="space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-600/90">
-          みんなの精算
-        </p>
-        <h1 className="text-[1.65rem] font-black leading-tight tracking-tight text-slate-950">
-          アカウント作成
-        </h1>
-        <p className="text-sm leading-relaxed text-slate-500">
-          メール確認が有効な場合は、メール内リンク後にログインしてください。
-        </p>
-      </header>
-
-      {error ? (
-        <p className="mt-6 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
-          {error}
-        </p>
-      ) : null}
-
-      <form
-        id="signup-form"
-        className={`flex flex-col gap-6 ${error ? "mt-6" : "mt-8"}`}
-        action={signupAction}
-      >
-        <input type="hidden" name="next" value={next} />
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="font-semibold text-slate-700">表示名</span>
-          <AuthInputWithLeadingIcon
-            id="signup-display-name"
-            icon={UserRound}
-            type="text"
-            name="display_name"
-            autoComplete="nickname"
-            required
-            maxLength={40}
-            placeholder="グループ内で表示される名前"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="font-semibold text-slate-700">メール</span>
-          <AuthInputWithLeadingIcon
-            icon={Mail}
-            type="email"
-            name="email"
-            autoComplete="email"
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="font-semibold text-slate-700">
-            パスワード（8文字以上）
-          </span>
-          <PasswordInputWithToggle
-            name="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-          />
-        </label>
-        <AuthSubmitButton label="作成する" pendingLabel="作成中…" />
-      </form>
-
-      <AuthOAuthDivider />
-
-      <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
-        Google で登録する場合も、上の表示名がグループ内の名前として使われます。
-      </p>
-
-      <div className="mt-6">
-        <GoogleSignInButton
-          nextPath={next}
-          label="Google で登録"
-          displayNameFormId="signup-form"
-          displayNameFieldId="signup-display-name"
-        />
-      </div>
-
-      <p className="mt-8 text-center text-sm leading-relaxed text-slate-500">
-        すでにアカウントがある場合は{" "}
-        <Link
-          href={loginHref}
-          className="font-semibold text-indigo-600 underline-offset-2 transition-colors hover:text-indigo-500 focus-visible:rounded-sm focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2"
-        >
-          ログイン
-        </Link>
-      </p>
-    </AuthPageShell>
+    <Suspense
+      fallback={
+        <AuthPageShell>
+          <p className="text-center text-sm text-slate-500">読み込み中…</p>
+        </AuthPageShell>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }

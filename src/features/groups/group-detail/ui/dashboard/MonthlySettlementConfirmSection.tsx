@@ -1,5 +1,5 @@
 import { confirmMonthlySettlementAction } from "@/features/settlement/actions/settlement-actions";
-import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
+import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
 
 type Props = {
   groupId: string;

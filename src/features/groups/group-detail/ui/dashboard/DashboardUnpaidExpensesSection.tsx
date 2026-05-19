@@ -1,6 +1,6 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
 import { ExpenseFeed } from "@/features/expenses/ui/ExpenseFeed";
-import { EmptyState } from "@/shared/ui/EmptyState";
+import { EmptyState } from "@/features/shared/ui/EmptyState";
 import { Landmark } from "lucide-react";
 
 type Props = {

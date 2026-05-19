@@ -1,6 +1,6 @@
 "use client";
 
-import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
+import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
 
 type Props = {
   label: string;

@@ -1,4 +1,4 @@
-import { GroupsSegmentSkeleton } from "@/shared/ui/GroupsSegmentSkeleton";
+import { GroupsSegmentSkeleton } from "@/features/shared/ui/GroupsSegmentSkeleton";
 
 export default function GroupsLoading() {
   return <GroupsSegmentSkeleton />;

@@ -9,17 +9,32 @@ description: Supabase クエリの配置・型安全・RLS 規約。DB アクセ
 
 | 用途 | 配置場所 | クライアント種別 |
 |---|---|---|
-| **読み取り（ページ表示）** | RSC 内、または `src/features/<domain>/lib/service.ts` | `createServerClient` |
-| **書き込み（INSERT/UPDATE/DELETE）** | **Server Action のみ** (`src/features/<domain>/actions/`) | `createServerClient` |
+| **Supabase 呼び出し本体** | `src/features/<domain>/lib/repositories/*.ts` | 第1引数 `SupabaseClient` |
+| **バリデーション・オーケストーション** | `src/features/<domain>/lib/services/*.ts`（必要時） | repository 経由 |
+| **エントリ（書き込み）** | `src/features/<domain>/actions/` または `src/app/api/**/route.ts` | `createClient` 取得後 repository 呼び出し |
+| **読み取り（ページ表示）** | RSC → `lib/service.ts` → repository | `createClient` |
 | **クライアント側の読み取り** | Client Component | `createBrowserClient`（読み取りのみ） |
 
 **書き込みを Client Component から直接行わない**。必ず Server Action 経由にする。
+
+**`actions/` と `app/api/**/route.ts` に `.from(` / `.rpc(` を直書きしない**。新規クエリは repository に追加する。
+
+### repository 命名・引数
+
+- 関数: `select*` / `insert*` / `update*` / `delete*` またはドメイン動詞（例: `acceptGroupInvite`）
+- 第1引数は常に `SupabaseClient`
+- 例外（レガシー）: `auth-repository` の `signUpWithEmail` / `signInWithPassword` / `signOut` は内部で `createClient` する
+
+### 直書きの例外
+
+- `src/server/supabase/middleware.ts` — セッション更新
+- Client の OAuth 開始（例: `GoogleSignInButton`）— `auth.signInWithOAuth` のみ
 
 ## クライアントの作り方
 
 - Server Component / Server Action: `createServerClient` (cookies 経由でセッション復元)
 - Client Component: `createBrowserClient`
-- 既存実装: `src/shared/supabase/` 配下を参照
+- 既存実装: `src/server/supabase/` 配下を参照
 
 ## 型安全
 
@@ -52,6 +67,7 @@ if (error) {
 ## やってはいけないこと
 
 - 書き込み系を Client Component から実行
+- `actions/` や Route Handler に `.from(` / `.rpc(` を直書きする
 - `as any` で型を握り潰す
 - error チェックなしで data をそのまま使う
 - RLS 無効化したテーブルを作る

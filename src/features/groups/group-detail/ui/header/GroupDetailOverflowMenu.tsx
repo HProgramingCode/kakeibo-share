@@ -1,7 +1,8 @@
 "use client";
 
 import { updateProfileDisplayNameAction } from "@/features/auth/actions/profile-actions";
-import { PendingButton } from "@/shared/ui/PendingButton";
+import { groupChartsPath } from "@/lib/routes";
+import { PendingButton } from "@/features/shared/ui/PendingButton";
 import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import { GroupInviteLinkPanel } from "./GroupInviteLinkPanel";
 import { BarChart3, ChevronRight, MoreVertical, X } from "lucide-react";
@@ -106,7 +107,7 @@ export function GroupDetailOverflowMenu({
                   このグループ
                 </h3>
                 <Link
-                  href={`/groups/${groupId}/charts`}
+                  href={groupChartsPath(groupId)}
                   onClick={close}
                   className="group flex items-center gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 transition-all hover:border-indigo-200 active:scale-[0.99]"
                 >

@@ -2,7 +2,7 @@ import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-i
 import type { BatchRow } from "@/features/groups/group-detail/lib/types";
 import { SettlementBatchesList } from "./SettlementBatchesList";
 import { SettledExpensesSection } from "./SettledExpensesSection";
-import { EmptyState } from "@/shared/ui/EmptyState";
+import { EmptyState } from "@/features/shared/ui/EmptyState";
 import { History } from "lucide-react";
 
 type Props = {

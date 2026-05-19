@@ -1,3 +1,4 @@
+import { ROUTES } from "@/lib/routes";
 import Link from "next/link";
 import type { GroupDetailMenuMember } from "./GroupDetailOverflowMenu";
 import { GroupDetailOverflowMenu } from "./GroupDetailOverflowMenu";
@@ -23,7 +24,7 @@ export function GroupDetailScreenHeader({
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <Link
-            href="/groups"
+            href={ROUTES.groups}
             aria-label="グループ一覧へ"
             className="inline-block rounded-md text-slate-950 no-underline transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
@@ -40,7 +41,7 @@ export function GroupDetailScreenHeader({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            href="/groups"
+            href={ROUTES.groups}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 transition-all active:scale-95"
             aria-label="グループ一覧"
           >

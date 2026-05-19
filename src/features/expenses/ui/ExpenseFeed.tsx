@@ -1,9 +1,12 @@
 "use client";
 
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
-import { ExpenseEditSheet, type MemberForExpenseEdit } from "@/features/expenses/ui/ExpenseEditSheet";
-import type { ExpenseCategory } from "@/shared/lib/expense-categories";
-import { formatYen } from "@/shared/lib/format-yen";
+import {
+  ExpenseEditSheet,
+  type MemberForExpenseEdit,
+} from "@/features/expenses/ui/ExpenseEditSheet";
+import type { ExpenseCategory } from "@/lib/expense-categories";
+import { formatYen } from "@/lib/format-yen";
 import {
   ChevronRight,
   Gamepad2,
@@ -59,7 +62,11 @@ export function ExpenseFeed({ items, groupId, membersForEdit }: Props) {
         <ul className="flex flex-col gap-3">
           {items.map((e) => (
             <li key={e.id}>
-              <ExpenseFeedRow e={e} canEdit={canEdit} onEdit={() => setEditing(e)} />
+              <ExpenseFeedRow
+                e={e}
+                canEdit={canEdit}
+                onEdit={() => setEditing(e)}
+              />
             </li>
           ))}
         </ul>
@@ -94,10 +101,19 @@ export function ExpenseFeed({ items, groupId, membersForEdit }: Props) {
 
   return (
     <>
-      <motion.ul className="flex flex-col gap-3" variants={container} initial="hidden" animate="show">
+      <motion.ul
+        className="flex flex-col gap-3"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         {items.map((e) => (
           <motion.li key={e.id} variants={itemVariants}>
-            <ExpenseFeedRow e={e} canEdit={canEdit} onEdit={() => setEditing(e)} />
+            <ExpenseFeedRow
+              e={e}
+              canEdit={canEdit}
+              onEdit={() => setEditing(e)}
+            />
           </motion.li>
         ))}
       </motion.ul>
@@ -133,7 +149,9 @@ function ExpenseFeedRow({
           <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />
         </div>
         <div className="min-w-0">
-          <h3 className="line-clamp-1 text-sm font-bold text-slate-800">{title}</h3>
+          <h3 className="line-clamp-1 text-sm font-bold text-slate-800">
+            {title}
+          </h3>
           <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             {e.payerLabel} · {formatExpenseDate(e.expense_date)}
             {e.category ? ` · ${e.category}` : ""}
@@ -142,8 +160,12 @@ function ExpenseFeedRow({
       </div>
       <div className="flex shrink-0 items-center gap-2 pl-2">
         <div className="text-right">
-          <p className="text-sm font-black tabular-nums text-slate-950">{formatYen(e.amount)}</p>
-          <p className="text-[9px] font-bold text-slate-400">負担:{e.participantCount}人</p>
+          <p className="text-sm font-black tabular-nums text-slate-950">
+            {formatYen(e.amount)}
+          </p>
+          <p className="text-[9px] font-bold text-slate-400">
+            負担:{e.participantCount}人
+          </p>
         </div>
         {showEdit ? (
           <button

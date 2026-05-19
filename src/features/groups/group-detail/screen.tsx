@@ -12,7 +12,9 @@ import { GroupDetailHistoryPanel } from "./ui/history/GroupDetailHistoryPanel";
 import { GroupDetailScreenHeader } from "./ui/header/GroupDetailScreenHeader";
 import { GroupDetailTabs } from "./ui/GroupDetailTabs";
 import { GroupExpenseCreateSection } from "./ui/GroupExpenseCreateSection";
-import { createClient } from "@/shared/supabase/server";
+import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { createClient } from "@/server/supabase/server";
+import { ROUTES } from "@/lib/routes";
 import { notFound, redirect } from "next/navigation";
 
 export default async function GroupDetailPage({
@@ -27,10 +29,10 @@ export default async function GroupDetailPage({
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authRepo.getSessionUser(supabase);
 
   if (!user) {
-    redirect("/login");
+    redirect(ROUTES.login);
   }
 
   const loadResult = await loadGroupDetailPageData(supabase, {
@@ -124,7 +126,10 @@ export default async function GroupDetailPage({
         menuMembers={menuMembers}
       />
 
-      <GroupDetailFlashAlerts queryError={queryError} settledMonth={settledMonth} />
+      <GroupDetailFlashAlerts
+        queryError={queryError}
+        settledMonth={settledMonth}
+      />
 
       <GroupDetailTabs
         dashboard={dashboardSlot}

@@ -1,7 +1,9 @@
 "use client";
 
 import { logoutAction } from "@/features/auth/actions/logout-action";
-import { PendingButton } from "@/shared/ui/PendingButton";
+import getFirstAuthErrorMessage from "@/features/auth/lib/auth-error-message";
+import type { AuthFormResult } from "@/features/auth/types/auth-form-result";
+import { PendingButton } from "@/features/shared/ui/PendingButton";
 import { LogOut, X } from "lucide-react";
 import {
   useCallback,
@@ -11,6 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal, useFormStatus } from "react-dom";
+import { useActionState } from "react";
 
 type Props = {
   /** トリガー直下のラッパー（例: display 調整） */
@@ -22,15 +25,22 @@ type Props = {
   children?: ReactNode;
 };
 
+const initialState: AuthFormResult = {
+  ok: true,
+  message: "",
+};
+
 const defaultButtonClass =
   "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-2xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-[0.98] motion-reduce:active:scale-100";
 
 function LogoutFormFields({
   titleId,
   onClose,
+  errorMessage,
 }: {
   titleId: string;
   onClose: () => void;
+  errorMessage: string | null;
 }) {
   const { pending } = useFormStatus();
 
@@ -50,6 +60,13 @@ function LogoutFormFields({
           <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
+
+      {errorMessage ? (
+        <p className="mb-4 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+          {errorMessage}
+        </p>
+      ) : null}
+
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
         <button
           type="button"
@@ -84,6 +101,8 @@ export function LogoutConfirmForm({
   const titleId = useId();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [state, formAction] = useActionState(logoutAction, initialState);
+  const errorMessage = getFirstAuthErrorMessage(state);
 
   useEffect(() => {
     setMounted(true);
@@ -126,8 +145,12 @@ export function LogoutConfirmForm({
             paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))",
           }}
         >
-          <form action={logoutAction}>
-            <LogoutFormFields titleId={titleId} onClose={close} />
+          <form action={formAction}>
+            <LogoutFormFields
+              titleId={titleId}
+              onClose={close}
+              errorMessage={errorMessage}
+            />
           </form>
         </div>
       </div>

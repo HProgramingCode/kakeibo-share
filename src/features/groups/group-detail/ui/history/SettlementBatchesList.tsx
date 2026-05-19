@@ -1,5 +1,5 @@
 import type { BatchRow } from "@/features/groups/group-detail/lib/types";
-import { formatYen } from "@/shared/lib/format-yen";
+import { formatYen } from "@/lib/format-yen";
 
 type Props = {
   batches: BatchRow[];

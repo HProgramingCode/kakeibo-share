@@ -15,13 +15,21 @@ description: kakeibo-share の Server Action 規約。actions/ ディレクト�
 
 ### 1. 認証チェック
 
-`createServerClient` で Supabase クライアントを取得し、最初にユーザ認証を確認:
+`createClient` で Supabase クライアントを取得し、`auth-repository` の `getSessionUser` で認証を確認:
 
 ```ts
-const supabase = createServerClient(...);
-const { data: { user } } = await supabase.auth.getUser();
+import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { createClient } from "@/server/supabase/server";
+
+const supabase = await createClient();
+const { data: { user } } = await authRepo.getSessionUser(supabase);
 if (!user) return { ok: false, error: "UNAUTHORIZED" };
 ```
+
+### 1b. DB アクセスは repository 経由
+
+- Action 内で `supabase.from(...)` / `supabase.rpc(...)` を書かない
+- バリデーション・複数テーブル・エラー変換が増える場合は `lib/services/` に切り出す（例: `profile-service.ts`）
 
 ### 2. 冪等性 (`client_request_id`)
 
@@ -66,13 +74,21 @@ redirect(`/groups/${groupId}?t=${Date.now()}`);
 
 ## エラー処理パターン
 
-Supabase クエリは必ず `{ data, error }` を分解して error を先にチェック:
+repository の戻り値は必ず `{ data, error }` を分解して error を先にチェック:
 
 ```ts
-const { data, error } = await supabase.from("expenses").insert(...).select().single();
+const { data, error } = await expenseRepo.insertExpense(supabase, row);
 if (error) return { ok: false, error: error.message };
 return { ok: true, data };
 ```
+
+## auth 画面と他経路の同時更新
+
+認証画面を `useActionState` + `AuthFormResult` にした場合:
+
+- **同じ PR で** OAuth callback・middleware・招待 `next` など、リダイレクト/エラーを出す**すべての経路**を grep して更新する
+- `redirect(?error=)` と `{ ok: false, formErrors }` を混在させない（例外: OAuth callback → UI が `?error=` を表示）
+- 詳細は `.claude/skills/auth-flow-rules/` と `.cursor/rules/auth-change-verification.mdc` を参照
 
 ## やってはいけないこと
 
@@ -80,6 +96,7 @@ return { ok: true, data };
 - `client_request_id` を受け取らない書き込み Action
 - 戻り値で結果を返さず `throw` だけする実装
 - 影響のあるパスを `revalidatePath` し忘れる
+- Action に Supabase クエリを直書きする（repository / service を使う）
 
 ## トリガー語
 

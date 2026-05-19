@@ -2,19 +2,21 @@ import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import { loadGroupListPageData } from "@/features/groups/lib/services/group-list-service";
 import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
 import Link from "next/link";
-import { createClient } from "@/shared/supabase/server";
-import { EmptyState } from "@/shared/ui/EmptyState";
+import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { createClient } from "@/server/supabase/server";
+import { EmptyState } from "@/features/shared/ui/EmptyState";
 import { ChevronRight, Plus, UsersRound } from "lucide-react";
+import { groupDetailPath, ROUTES } from "@/lib/routes";
 import { redirect } from "next/navigation";
 
 export default async function GroupsPage() {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authRepo.getSessionUser(supabase);
 
   if (!user) {
-    redirect("/login");
+    redirect(ROUTES.login);
   }
 
   const loadResult = await loadGroupListPageData(supabase, user.id);
@@ -46,7 +48,7 @@ export default async function GroupsPage() {
           </div>
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <Link
-              href="/groups/new"
+              href={ROUTES.groupsNew}
               className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-2xl border border-indigo-200/90 bg-indigo-50/90 px-3.5 text-sm font-semibold text-indigo-800 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-[0.98] motion-reduce:active:scale-100 sm:px-4"
             >
               <Plus
@@ -81,7 +83,7 @@ export default async function GroupsPage() {
             return (
               <li key={row.group_id}>
                 <Link
-                  href={`/groups/${gid}`}
+                  href={groupDetailPath(gid)}
                   className="flex items-center justify-between gap-4 rounded-3xl border border-slate-100 bg-white px-5 py-5 shadow-card transition-all duration-200 hover:shadow-card-hover active:scale-[0.98]"
                 >
                   <div className="min-w-0">

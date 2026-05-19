@@ -5,7 +5,11 @@ import {
   OAUTH_SIGNUP_DISPLAY_NAME_COOKIE,
   OAUTH_SIGNUP_DISPLAY_NAME_MAX,
 } from "@/features/auth/lib/oauth-display-name-cookie";
-import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
+import { appendNextQuery } from "@/features/auth/lib/build-auth-next-query";
+import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import * as profileRepo from "@/features/auth/lib/repositories/profile-repository";
+import { safeAuthRedirectPath } from "@/lib/auth-redirect";
+import { ROUTES } from "@/lib/routes";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -13,7 +17,7 @@ export async function GET(request: Request) {
   const next = safeAuthRedirectPath(url.searchParams.get("next"));
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login", url.origin));
+    return NextResponse.redirect(new URL(ROUTES.login, url.origin));
   }
 
   const cookieStore = await cookies();
@@ -49,9 +53,11 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error.message)}`, url.origin),
+    const loginErrorPath = appendNextQuery(
+      `${ROUTES.login}?error=${encodeURIComponent(error.message)}`,
+      next,
     );
+    return NextResponse.redirect(new URL(loginErrorPath, url.origin));
   }
 
   const userId = sessionData.session?.user?.id;
@@ -66,12 +72,13 @@ export async function GET(request: Request) {
     pendingName &&
     pendingName.length <= OAUTH_SIGNUP_DISPLAY_NAME_MAX
   ) {
-    const { error: profileErr } = await supabase
-      .from("profiles")
-      .update({ display_name: pendingName })
-      .eq("id", userId);
+    const { error: profileErr } = await profileRepo.updateProfileDisplayName(
+      supabase,
+      userId,
+      pendingName,
+    );
     if (!profileErr) {
-      await supabase.auth.updateUser({ data: { full_name: pendingName } });
+      await authRepo.updateUserMetadata(supabase, { full_name: pendingName });
     }
   }
 

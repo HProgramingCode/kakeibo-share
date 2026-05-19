@@ -1,6 +1,6 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
 import { ExpenseFeedWithMonthFilter } from "@/features/expenses/ui/ExpenseFeedWithMonthFilter";
-import { EmptyState } from "@/shared/ui/EmptyState";
+import { EmptyState } from "@/features/shared/ui/EmptyState";
 import { History } from "lucide-react";
 
 type Props = {

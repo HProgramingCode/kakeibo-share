@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/lib/utils";
 import { LayoutDashboard, NotebookPen, ScrollText } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";

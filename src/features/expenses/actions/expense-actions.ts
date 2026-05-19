@@ -1,39 +1,54 @@
 "use server";
 
+import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import * as expenseRepo from "@/features/expenses/lib/repositories/expense-repository";
+import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
 import {
   EXPENSE_CATEGORY_OPTIONS,
   type ExpenseCategory,
-} from "@/shared/lib/expense-categories";
-import { redirectGroupDetailWithError } from "@/shared/lib/redirect-group-detail";
-import { createClient } from "@/shared/supabase/server";
-import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
+} from "@/lib/expense-categories";
+import { redirectGroupDetailWithError } from "@/lib/redirect-group-detail";
+import { groupDetailPath, ROUTES } from "@/lib/routes";
+import { createClient } from "@/server/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createExpenseAction(formData: FormData) {
   const groupId = String(formData.get("group_id") ?? "").trim();
   if (!groupId) {
-    redirect("/groups");
+    redirect(ROUTES.groups);
   }
 
-  const clientRequestId = String(formData.get("client_request_id") ?? "").trim();
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clientRequestId)) {
-    redirectGroupDetailWithError(groupId, "支出登録の送信情報が不正です。もう一度お試しください。");
+  const clientRequestId = String(
+    formData.get("client_request_id") ?? "",
+  ).trim();
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      clientRequestId,
+    )
+  ) {
+    redirectGroupDetailWithError(
+      groupId,
+      "支出登録の送信情報が不正です。もう一度お試しください。",
+    );
   }
 
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authRepo.getSessionUser(supabase);
 
   if (!user) {
-    redirect("/login");
+    redirect(ROUTES.login);
   }
 
   const amountRaw = String(formData.get("amount") ?? "").trim();
   const amount = Number.parseInt(amountRaw, 10);
   if (!Number.isFinite(amount) || amount <= 0) {
-    redirectGroupDetailWithError(groupId, "金額は1円以上の整数で入力してください。");
+    redirectGroupDetailWithError(
+      groupId,
+      "金額は1円以上の整数で入力してください。",
+    );
   }
 
   const expenseDate = String(formData.get("expense_date") ?? "").trim();
@@ -44,8 +59,9 @@ export async function createExpenseAction(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim() || null;
   const categoryRaw = String(formData.get("category") ?? "").trim();
   const category =
-    categoryRaw && EXPENSE_CATEGORY_OPTIONS.includes(categoryRaw as ExpenseCategory)
-      ? categoryRaw
+    categoryRaw &&
+    EXPENSE_CATEGORY_OPTIONS.includes(categoryRaw as ExpenseCategory)
+      ? (categoryRaw as ExpenseCategory)
       : null;
 
   const payerId = String(formData.get("payer_id") ?? "").trim();
@@ -74,18 +90,24 @@ export async function createExpenseAction(formData: FormData) {
 
   const memberSet = new Set(members.map((m) => m.user_id));
   if (!memberSet.has(payerId)) {
-    redirectGroupDetailWithError(groupId, "支払者がこのグループのメンバーではありません。");
+    redirectGroupDetailWithError(
+      groupId,
+      "支払者がこのグループのメンバーではありません。",
+    );
   }
 
   for (const pid of participantIds) {
     if (!memberSet.has(pid)) {
-      redirectGroupDetailWithError(groupId, "負担メンバーにグループ外のユーザーが含まれています。");
+      redirectGroupDetailWithError(
+        groupId,
+        "負担メンバーにグループ外のユーザーが含まれています。",
+      );
     }
   }
 
-  const { data: inserted, error: insErr } = await supabase
-    .from("expenses")
-    .insert({
+  const { data: inserted, error: insErr } = await expenseRepo.insertExpense(
+    supabase,
+    {
       group_id: groupId,
       payer_id: payerId,
       amount,
@@ -94,17 +116,19 @@ export async function createExpenseAction(formData: FormData) {
       category,
       client_request_id: clientRequestId,
       status: "unpaid",
-    })
-    .select("id")
-    .single();
+    },
+  );
 
   const newExpenseId = inserted?.id;
   if (insErr || newExpenseId == null) {
     if (insErr?.code === "23505") {
-      revalidatePath(`/groups/${groupId}`, "page");
+      revalidatePath(groupDetailPath(groupId), "page");
       return;
     }
-    redirectGroupDetailWithError(groupId, insErr?.message ?? "支出の保存に失敗しました。");
+    redirectGroupDetailWithError(
+      groupId,
+      insErr?.message ?? "支出の保存に失敗しました。",
+    );
   }
 
   const parts = participantIds.map((user_id) => ({
@@ -112,37 +136,40 @@ export async function createExpenseAction(formData: FormData) {
     user_id,
   }));
 
-  const { error: partErr } = await supabase.from("expense_participants").insert(parts);
+  const { error: partErr } = await expenseRepo.insertExpenseParticipants(
+    supabase,
+    parts,
+  );
 
   if (partErr) {
-    await supabase.from("expenses").delete().eq("id", newExpenseId);
-    redirectGroupDetailWithError(groupId, partErr.message ?? "負担メンバーの保存に失敗しました。");
+    await expenseRepo.deleteExpenseById(supabase, newExpenseId);
+    redirectGroupDetailWithError(
+      groupId,
+      partErr.message ?? "負担メンバーの保存に失敗しました。",
+    );
   }
 
-  revalidatePath(`/groups/${groupId}`, "page");
+  revalidatePath(groupDetailPath(groupId), "page");
 }
 
 export async function updateExpenseAction(formData: FormData) {
   const groupId = String(formData.get("group_id") ?? "").trim();
   const expenseId = String(formData.get("expense_id") ?? "").trim();
   if (!groupId || !expenseId) {
-    redirect("/groups");
+    redirect(ROUTES.groups);
   }
 
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authRepo.getSessionUser(supabase);
 
   if (!user) {
-    redirect("/login");
+    redirect(ROUTES.login);
   }
 
-  const { data: existing, error: exErr } = await supabase
-    .from("expenses")
-    .select("id, group_id, status")
-    .eq("id", expenseId)
-    .maybeSingle();
+  const { data: existing, error: exErr } =
+    await expenseRepo.selectExpenseForUpdate(supabase, expenseId);
 
   if (exErr || !existing || existing.group_id !== groupId) {
     redirectGroupDetailWithError(groupId, "支出が見つかりません。");
@@ -154,7 +181,10 @@ export async function updateExpenseAction(formData: FormData) {
   const amountRaw = String(formData.get("amount") ?? "").trim();
   const amount = Number.parseInt(amountRaw, 10);
   if (!Number.isFinite(amount) || amount <= 0) {
-    redirectGroupDetailWithError(groupId, "金額は1円以上の整数で入力してください。");
+    redirectGroupDetailWithError(
+      groupId,
+      "金額は1円以上の整数で入力してください。",
+    );
   }
 
   const expenseDate = String(formData.get("expense_date") ?? "").trim();
@@ -165,8 +195,9 @@ export async function updateExpenseAction(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim() || null;
   const categoryRaw = String(formData.get("category") ?? "").trim();
   const category =
-    categoryRaw && EXPENSE_CATEGORY_OPTIONS.includes(categoryRaw as ExpenseCategory)
-      ? categoryRaw
+    categoryRaw &&
+    EXPENSE_CATEGORY_OPTIONS.includes(categoryRaw as ExpenseCategory)
+      ? (categoryRaw as ExpenseCategory)
       : null;
 
   const payerId = String(formData.get("payer_id") ?? "").trim();
@@ -195,37 +226,50 @@ export async function updateExpenseAction(formData: FormData) {
 
   const memberSet = new Set(members.map((m) => m.user_id));
   if (!memberSet.has(payerId)) {
-    redirectGroupDetailWithError(groupId, "支払者がこのグループのメンバーではありません。");
+    redirectGroupDetailWithError(
+      groupId,
+      "支払者がこのグループのメンバーではありません。",
+    );
   }
 
   for (const pid of participantIds) {
     if (!memberSet.has(pid)) {
-      redirectGroupDetailWithError(groupId, "負担メンバーにグループ外のユーザーが含まれています。");
+      redirectGroupDetailWithError(
+        groupId,
+        "負担メンバーにグループ外のユーザーが含まれています。",
+      );
     }
   }
 
-  const { error: updErr } = await supabase
-    .from("expenses")
-    .update({
+  const { error: updErr } = await expenseRepo.updateExpense(
+    supabase,
+    expenseId,
+    {
       payer_id: payerId,
       amount,
       expense_date: expenseDate,
       title,
       category,
-    })
-    .eq("id", expenseId);
+    },
+  );
 
   if (updErr) {
-    redirectGroupDetailWithError(groupId, updErr.message ?? "支出の更新に失敗しました。");
+    redirectGroupDetailWithError(
+      groupId,
+      updErr.message ?? "支出の更新に失敗しました。",
+    );
   }
 
-  const { error: delErr } = await supabase
-    .from("expense_participants")
-    .delete()
-    .eq("expense_id", expenseId);
+  const { error: delErr } = await expenseRepo.deleteExpenseParticipants(
+    supabase,
+    expenseId,
+  );
 
   if (delErr) {
-    redirectGroupDetailWithError(groupId, delErr.message ?? "負担メンバーの更新に失敗しました。");
+    redirectGroupDetailWithError(
+      groupId,
+      delErr.message ?? "負担メンバーの更新に失敗しました。",
+    );
   }
 
   const parts = participantIds.map((user_id) => ({
@@ -233,11 +277,17 @@ export async function updateExpenseAction(formData: FormData) {
     user_id,
   }));
 
-  const { error: partErr } = await supabase.from("expense_participants").insert(parts);
+  const { error: partErr } = await expenseRepo.insertExpenseParticipants(
+    supabase,
+    parts,
+  );
 
   if (partErr) {
-    redirectGroupDetailWithError(groupId, partErr.message ?? "負担メンバーの保存に失敗しました。");
+    redirectGroupDetailWithError(
+      groupId,
+      partErr.message ?? "負担メンバーの保存に失敗しました。",
+    );
   }
 
-  revalidatePath(`/groups/${groupId}`, "page");
+  revalidatePath(groupDetailPath(groupId), "page");
 }

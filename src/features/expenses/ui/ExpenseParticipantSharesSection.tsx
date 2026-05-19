@@ -2,7 +2,7 @@
 
 import { PayerPickField } from "@/features/expenses/ui/PayerPickField";
 import { computeParticipantShares } from "@/features/settlement/lib/dashboard-balances";
-import { formatYen } from "@/shared/lib/format-yen";
+import { formatYen } from "@/lib/format-yen";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export type ParticipantPickMember = { user_id: string; label: string };
@@ -75,7 +75,10 @@ export function ExpenseParticipantSharesSection({
   );
 
   const activeParticipantIds = useMemo(() => {
-    const ids = [payerId, ...others.filter((m) => included[m.user_id]).map((m) => m.user_id)];
+    const ids = [
+      payerId,
+      ...others.filter((m) => included[m.user_id]).map((m) => m.user_id),
+    ];
     return [...new Set(ids)];
   }, [payerId, others, included]);
 
@@ -84,7 +87,8 @@ export function ExpenseParticipantSharesSection({
     [amount, payerId, activeParticipantIds],
   );
 
-  const payerLabel = members.find((m) => m.user_id === payerId)?.label ?? "（未設定）";
+  const payerLabel =
+    members.find((m) => m.user_id === payerId)?.label ?? "（未設定）";
   const payerShare = shares.get(payerId) ?? 0;
 
   return (
@@ -95,7 +99,9 @@ export function ExpenseParticipantSharesSection({
         onValueChange={(id) => {
           setPayerId(id);
           const nextOthers = members.filter((m) => m.user_id !== id);
-          setIncluded(Object.fromEntries(nextOthers.map((m) => [m.user_id, false])));
+          setIncluded(
+            Object.fromEntries(nextOthers.map((m) => [m.user_id, false])),
+          );
         }}
         legendScreenReaderOnly={payerLegendScreenReaderOnly}
         portal={payerPickerPortal}
@@ -144,11 +150,16 @@ export function ExpenseParticipantSharesSection({
                       value={m.user_id}
                       checked={on}
                       onChange={(e) =>
-                        setIncluded((p) => ({ ...p, [m.user_id]: e.target.checked }))
+                        setIncluded((p) => ({
+                          ...p,
+                          [m.user_id]: e.target.checked,
+                        }))
                       }
                       className="h-5 w-5 shrink-0 rounded-lg border-slate-200 text-indigo-600 transition-all duration-200 focus:ring-2 focus:ring-indigo-500/30"
                     />
-                    <span className="min-w-0 flex-1 truncate font-medium">{m.label}</span>
+                    <span className="min-w-0 flex-1 truncate font-medium">
+                      {m.label}
+                    </span>
                     <span className="shrink-0 font-mono text-sm font-semibold tabular-nums text-slate-600">
                       {amount > 0 && on ? formatYen(rowShare) : "—"}
                     </span>
@@ -160,9 +171,13 @@ export function ExpenseParticipantSharesSection({
         )}
 
         {amount <= 0 ? (
-          <p className="mt-3 text-[11px] text-slate-400">金額を入力すると負担額の目安が表示されます。</p>
+          <p className="mt-3 text-[11px] text-slate-400">
+            金額を入力すると負担額の目安が表示されます。
+          </p>
         ) : (
-          <p className="mt-3 text-[11px] text-slate-400">表示は送信前の試算です（登録後の精算計算と同じ均等割です）。</p>
+          <p className="mt-3 text-[11px] text-slate-400">
+            表示は送信前の試算です（登録後の精算計算と同じ均等割です）。
+          </p>
         )}
       </fieldset>
     </div>

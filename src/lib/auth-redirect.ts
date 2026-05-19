@@ -1,14 +1,16 @@
+import { ROUTES } from "@/lib/routes";
+
 /**
  * OAuth・メールログイン後の next クエリ用。オープンリダイレクトを防ぐ。
  */
 export function safeAuthRedirectPath(
   next: string | null | undefined,
-  fallback = "/groups",
+  fallback = ROUTES.groups,
 ): string {
   if (next == null || typeof next !== "string") {
     return fallback;
   }
-  const trimmed = next.trim();
+  let trimmed = next.trim();
   if (!trimmed.startsWith("/") || trimmed.startsWith("//")) {
     return fallback;
   }
@@ -21,5 +23,10 @@ export function safeAuthRedirectPath(
   ) {
     return fallback;
   }
+
+  if (trimmed === "/join" || trimmed.startsWith("/join?")) {
+    trimmed = trimmed.replace(/^\/join/, ROUTES.groupsJoin);
+  }
+
   return trimmed;
 }

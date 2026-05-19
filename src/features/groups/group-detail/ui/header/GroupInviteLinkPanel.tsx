@@ -1,7 +1,7 @@
 "use client";
 
 import { createGroupInviteAction } from "@/features/groups/actions/group-invite-actions";
-import { PendingButton } from "@/shared/ui/PendingButton";
+import { PendingButton } from "@/features/shared/ui/PendingButton";
 import { Link2 } from "lucide-react";
 import { useState } from "react";
 

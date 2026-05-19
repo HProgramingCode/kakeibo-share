@@ -1,6 +1,6 @@
 "use client";
 
-import { PendingButton } from "@/shared/ui/PendingButton";
+import { PendingButton } from "@/features/shared/ui/PendingButton";
 import { useFormStatus } from "react-dom";
 
 type Props = {

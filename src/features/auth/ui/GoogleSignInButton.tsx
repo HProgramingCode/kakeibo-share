@@ -2,8 +2,8 @@
 
 import { setOAuthSignupDisplayNameCookie } from "@/features/auth/actions/oauth-signup-display-name-action";
 import { GoogleMark } from "@/features/auth/ui/GoogleMark";
-import { createClient } from "@/shared/supabase/client";
-import { safeAuthRedirectPath } from "@/shared/lib/auth-redirect";
+import { createClient } from "@/server/supabase/client";
+import { safeAuthRedirectPath } from "@/lib/auth-redirect";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 

@@ -4,7 +4,7 @@ import { updateExpenseAction } from "@/features/expenses/actions/expense-actions
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
 import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
 import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
-import { FormSubmitButton } from "@/shared/ui/FormSubmitButton";
+import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
 import { X } from "lucide-react";
 
 export type MemberForExpenseEdit = { user_id: string; label: string };

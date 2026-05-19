@@ -1,8 +1,8 @@
 "use client";
 
 import type { TransferPreview } from "@/features/settlement/lib/settlement-transfers-preview";
-import { formatYen } from "@/shared/lib/format-yen";
-import { cn } from "@/shared/lib/utils";
+import { formatYen } from "@/lib/format-yen";
+import { cn } from "@/lib/utils";
 import { ArrowRight, ArrowRightLeft } from "lucide-react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 
