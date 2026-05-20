@@ -32,6 +32,8 @@ supabase/.env
 /.vscode/
 /.cursor/
 /.claude/
+CLAUDE.md
+Claude.md
 /.idea/
 /.agents/
 /skills-lock.json
