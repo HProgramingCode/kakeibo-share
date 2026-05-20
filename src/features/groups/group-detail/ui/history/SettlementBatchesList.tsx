@@ -1,9 +1,11 @@
+"use client";
+
 import type { BatchRow } from "@/features/groups/group-detail/lib/types";
 import { formatYen } from "@/lib/format-yen";
 
 type Props = {
   batches: BatchRow[];
-  nameByUserId: Map<string, string>;
+  nameByUserId: Record<string, string>;
 };
 
 export function SettlementBatchesList({ batches, nameByUserId }: Props) {
@@ -25,9 +27,9 @@ export function SettlementBatchesList({ batches, nameByUserId }: Props) {
               <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 {transfers.map((t, i) => (
                   <li key={i} className="font-medium">
-                    {nameByUserId.get(t.from_user_id) ?? t.from_user_id}{" "}
+                    {nameByUserId[t.from_user_id] ?? t.from_user_id}{" "}
                     <span className="text-slate-400">→</span>{" "}
-                    {nameByUserId.get(t.to_user_id) ?? t.to_user_id}{" "}
+                    {nameByUserId[t.to_user_id] ?? t.to_user_id}{" "}
                     <span className="font-mono font-black tracking-tighter text-slate-900">
                       {formatYen(t.amount)}
                     </span>

@@ -1,6 +1,7 @@
 import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
 import { loadGroupListPageData } from "@/features/groups/lib/services/group-list-service";
 import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
+import { DeleteGroupConfirmForm } from "@/features/groups/ui/DeleteGroupConfirmForm";
 import Link from "next/link";
 import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
 import { createClient } from "@/server/supabase/server";
@@ -80,27 +81,33 @@ export default async function GroupsPage() {
         <ul className="flex flex-col gap-3">
           {rows.map((row) => {
             const gid = row.groups?.id ?? row.group_id;
+            const groupName = row.groups?.name ?? "（無題）";
+            const isOwner = row.role === "owner";
+
             return (
               <li key={row.group_id}>
-                <Link
-                  href={groupDetailPath(gid)}
-                  className="flex items-center justify-between gap-4 rounded-3xl border border-slate-100 bg-white px-5 py-5 shadow-card transition-all duration-200 hover:shadow-card-hover active:scale-[0.98]"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-slate-900">
-                      {row.groups?.name ?? "（無題）"}
-                    </p>
-                    <p className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-400">
-                      {row.role}
-                    </p>
-                  </div>
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50">
-                    <ChevronRight
-                      className="h-5 w-5 text-slate-400"
-                      strokeWidth={1.75}
+                <div className="flex items-stretch gap-1 rounded-3xl border border-slate-100 bg-white shadow-card transition-all duration-200 hover:shadow-card-hover">
+                  <Link
+                    href={groupDetailPath(gid)}
+                    className="flex min-w-0 flex-1 items-center justify-between gap-4 px-5 py-5 active:scale-[0.98]"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-900">
+                        {groupName}
+                      </p>
+                      <p className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-400">
+                        {row.role}
+                      </p>
+                    </div>
+                  </Link>
+                  {isOwner ? (
+                    <DeleteGroupConfirmForm
+                      groupId={gid}
+                      groupName={groupName}
+                      className="flex shrink-0 items-center pr-3"
                     />
-                  </div>
-                </Link>
+                  ) : null}
+                </div>
               </li>
             );
           })}

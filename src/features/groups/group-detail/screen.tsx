@@ -108,11 +108,17 @@ export default async function GroupDetailPage({
     />
   );
 
+  const currentMonth = currentMonthJstYm();
+
   const historySlot = (
     <GroupDetailHistoryPanel
+      groupId={id}
       settledFeedItems={settledFeedItems}
+      unpaidFeedItems={unpaidFeedItems}
+      membersForExpenseEdit={membersForExpenseEdit}
       batches={batches}
       nameByUserId={nameById}
+      initialMonth={currentMonth}
     />
   );
 

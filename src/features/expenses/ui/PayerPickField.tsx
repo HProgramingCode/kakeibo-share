@@ -36,7 +36,7 @@ type Props = {
 };
 
 /**
- * 支払者選択（カスタム listbox）。フォーム送信は hidden の name=payer_id（変更可）。
+ * 立替者選択（カスタム listbox）。フォーム送信は hidden の name=payer_id（変更可）。
  */
 export function PayerPickField({
   members,
@@ -260,7 +260,7 @@ export function PayerPickField({
           legendScreenReaderOnly && "sr-only",
         )}
       >
-        支払者
+        立替者
       </legend>
       <div
         className="relative min-w-0"

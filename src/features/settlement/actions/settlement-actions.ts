@@ -44,7 +44,7 @@ export async function confirmMonthlySettlementAction(formData: FormData) {
     );
   }
 
-  revalidatePath(groupDetailPath(groupId));
+  revalidatePath(groupDetailPath(groupId), "page");
   redirect(
     `${groupDetailPath(groupId)}?settled=${encodeURIComponent(targetMonth)}`,
   );

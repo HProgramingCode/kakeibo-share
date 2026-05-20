@@ -66,16 +66,24 @@ export async function createExpenseAction(formData: FormData) {
 
   const payerId = String(formData.get("payer_id") ?? "").trim();
   if (!payerId) {
-    redirectGroupDetailWithError(groupId, "支払者を選択してください。");
+    redirectGroupDetailWithError(groupId, "立替者を選択してください。");
   }
 
-  const checkboxParticipantIds = formData
-    .getAll("participant")
-    .map((v) => String(v).trim())
-    .filter(Boolean);
+  const participantIds = [
+    ...new Set(
+      formData
+        .getAll("participant")
+        .map((v) => String(v).trim())
+        .filter(Boolean),
+    ),
+  ];
 
-  /** 支払者はチェックボックスに無くても恒久的に負担対象に含める */
-  const participantIds = [...new Set([payerId, ...checkboxParticipantIds])];
+  if (participantIds.length === 0) {
+    redirectGroupDetailWithError(
+      groupId,
+      "負担に含めるメンバーを1人以上選んでください。",
+    );
+  }
 
   const { data: membersRaw, error: memErr } = await selectGroupMemberUserIds(
     supabase,
@@ -92,7 +100,7 @@ export async function createExpenseAction(formData: FormData) {
   if (!memberSet.has(payerId)) {
     redirectGroupDetailWithError(
       groupId,
-      "支払者がこのグループのメンバーではありません。",
+      "立替者がこのグループのメンバーではありません。",
     );
   }
 
@@ -202,16 +210,24 @@ export async function updateExpenseAction(formData: FormData) {
 
   const payerId = String(formData.get("payer_id") ?? "").trim();
   if (!payerId) {
-    redirectGroupDetailWithError(groupId, "支払者を選択してください。");
+    redirectGroupDetailWithError(groupId, "立替者を選択してください。");
   }
 
-  const checkboxParticipantIds = formData
-    .getAll("participant")
-    .map((v) => String(v).trim())
-    .filter(Boolean);
+  const participantIds = [
+    ...new Set(
+      formData
+        .getAll("participant")
+        .map((v) => String(v).trim())
+        .filter(Boolean),
+    ),
+  ];
 
-  /** 支払者はチェックボックスに無くても恒久的に負担対象に含める */
-  const participantIds = [...new Set([payerId, ...checkboxParticipantIds])];
+  if (participantIds.length === 0) {
+    redirectGroupDetailWithError(
+      groupId,
+      "負担に含めるメンバーを1人以上選んでください。",
+    );
+  }
 
   const { data: membersRaw, error: memErr } = await selectGroupMemberUserIds(
     supabase,
@@ -228,7 +244,7 @@ export async function updateExpenseAction(formData: FormData) {
   if (!memberSet.has(payerId)) {
     redirectGroupDetailWithError(
       groupId,
-      "支払者がこのグループのメンバーではありません。",
+      "立替者がこのグループのメンバーではありません。",
     );
   }
 

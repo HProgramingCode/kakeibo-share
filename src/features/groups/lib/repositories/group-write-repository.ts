@@ -32,3 +32,10 @@ export async function acceptGroupInvite(
     p_invite_token: token,
   });
 }
+
+export async function deleteGroupById(
+  client: SupabaseClient,
+  groupId: string,
+) {
+  return client.from("groups").delete().eq("id", groupId);
+}

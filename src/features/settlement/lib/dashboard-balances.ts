@@ -5,7 +5,7 @@ export type ExpenseForBalance = {
 };
 
 /**
- * 均等割の負担額（1円未満の端数は支払者負担）。精算ネット計算・フォーム試算と同一ルール。
+ * 均等割の負担額（1円未満の端数は立替者負担。負担リストにいなくても端数は立替者に付与）。
  */
 export function computeParticipantShares(
   amount: number,
@@ -19,14 +19,17 @@ export function computeParticipantShares(
   const base = Math.floor(amount / n);
   const rem = amount - base * n;
   for (const uid of participantIds) {
-    shares.set(uid, base + (uid === payerId ? rem : 0));
+    shares.set(uid, base);
+  }
+  if (rem > 0) {
+    shares.set(payerId, (shares.get(payerId) ?? 0) + rem);
   }
   return shares;
 }
 
 /**
  * 未精算支出の合計で、ユーザーごとのネット（プラス＝貸し、マイナス＝借り）。
- * 均等割の端数は支払者負担に寄せる（data-model.md と DB の精算 RPC と同一ルール）。
+ * 均等割の端数は立替者負担に寄せる（DB の精算 RPC と同一ルール）。
  */
 export function computeNetBalancesByUser(
   expenses: ExpenseForBalance[],

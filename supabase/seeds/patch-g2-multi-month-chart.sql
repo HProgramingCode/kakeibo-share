@@ -1,10 +1,7 @@
--- 第2グループ（ライフスタイル共有メンバー）向けチャート検証データ。
--- 既存 seed の 32000000-...001〜004（主に 2026-05）に加え、別暦月の未精算支出を追加する。
---
--- 再実行してよい: expenses / expense_participants は ON CONFLICT DO NOTHING。
+-- 第2グループ向けチャート検証データ（旧パッチ）。
+-- 新規環境は seed.sql に統合済み。既存 DB 向けは patch-history-current-month.sql を優先してください。
 --
 -- 適用例（ローカル）: supabase db reset 済みなら seed.sql に同内容が含まれる。
---       リモート: npx supabase db query --linked --file supabase/seeds/patch-g2-multi-month-chart.sql
 
 INSERT INTO public.expenses (
   id,

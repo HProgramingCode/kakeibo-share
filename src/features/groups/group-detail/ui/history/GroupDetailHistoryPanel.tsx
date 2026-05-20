@@ -1,40 +1,37 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
 import type { BatchRow } from "@/features/groups/group-detail/lib/types";
-import { SettlementBatchesList } from "./SettlementBatchesList";
-import { SettledExpensesSection } from "./SettledExpensesSection";
-import { EmptyState } from "@/features/shared/ui/EmptyState";
-import { History } from "lucide-react";
+import { GroupDetailHistoryPanelClient } from "./GroupDetailHistoryPanelClient";
 
 type Props = {
+  groupId: string;
   settledFeedItems: ExpenseFeedItemData[];
+  unpaidFeedItems: ExpenseFeedItemData[];
+  membersForExpenseEdit: { user_id: string; label: string }[];
   batches: BatchRow[];
   nameByUserId: Map<string, string>;
+  initialMonth: string;
 };
 
 export function GroupDetailHistoryPanel({
+  groupId,
   settledFeedItems,
+  unpaidFeedItems,
+  membersForExpenseEdit,
   batches,
   nameByUserId,
+  initialMonth,
 }: Props) {
-  return (
-    <div className="flex flex-col gap-8">
-      <SettledExpensesSection items={settledFeedItems} />
+  const nameRecord = Object.fromEntries(nameByUserId);
 
-      <section className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-          精算履歴
-        </h2>
-        {batches.length === 0 ? (
-          <EmptyState
-            icon={
-              <History className="h-6 w-6 text-slate-300" strokeWidth={1.5} aria-hidden />
-            }
-            title="精算履歴はまだありません"
-          />
-        ) : (
-          <SettlementBatchesList batches={batches} nameByUserId={nameByUserId} />
-        )}
-      </section>
-    </div>
+  return (
+    <GroupDetailHistoryPanelClient
+      groupId={groupId}
+      settledFeedItems={settledFeedItems}
+      unpaidFeedItems={unpaidFeedItems}
+      membersForExpenseEdit={membersForExpenseEdit}
+      batches={batches}
+      nameByUserId={nameRecord}
+      initialMonth={initialMonth}
+    />
   );
 }
