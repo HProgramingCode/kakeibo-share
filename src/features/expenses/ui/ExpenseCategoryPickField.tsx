@@ -4,8 +4,8 @@ import {
   computeExpensePickerPortalMenuGeom,
   EXPENSE_PICKER_MENU_PANEL_CLASS,
 } from "@/features/expenses/lib/expense-picker-portal-geometry";
-import { EXPENSE_CATEGORY_OPTIONS } from "@/shared/lib/expense-categories";
-import { cn } from "@/shared/lib/utils";
+import { EXPENSE_CATEGORY_OPTIONS } from "@/lib/expense-categories";
+import { cn } from "@/lib/utils";
 import { Check, ChevronDown } from "lucide-react";
 import {
   useCallback,
@@ -58,7 +58,9 @@ export function ExpenseCategoryPickField({
   const updatePortalGeom = useCallback(() => {
     const el = btnRef.current;
     if (!el) return;
-    setPortalGeom(computeExpensePickerPortalMenuGeom(el.getBoundingClientRect()));
+    setPortalGeom(
+      computeExpensePickerPortalMenuGeom(el.getBoundingClientRect()),
+    );
   }, []);
 
   useLayoutEffect(() => {
@@ -167,7 +169,9 @@ export function ExpenseCategoryPickField({
         aria-activedescendant={`${baseId}-opt-${highlight}`}
         className={cn(
           EXPENSE_PICKER_MENU_PANEL_CLASS,
-          portal ? "fixed" : "absolute left-0 right-0 top-full z-10 mt-1.5 max-h-[min(18rem,calc(100dvh-10rem))] w-full min-w-0",
+          portal
+            ? "fixed"
+            : "absolute left-0 right-0 top-full z-10 mt-1.5 max-h-[min(18rem,calc(100dvh-10rem))] w-full min-w-0",
         )}
         style={
           portal && portalGeom
@@ -191,7 +195,9 @@ export function ExpenseCategoryPickField({
             aria-selected={value === opt}
             className={cn(
               "flex w-full min-w-0 items-center justify-between gap-2 px-4 py-3 text-left text-sm font-semibold transition-colors",
-              i === highlight ? "bg-indigo-50 text-indigo-950" : "text-slate-800",
+              i === highlight
+                ? "bg-indigo-50 text-indigo-950"
+                : "text-slate-800",
               value === opt && "text-indigo-700",
             )}
             onMouseEnter={() => setHighlight(i)}
@@ -199,7 +205,11 @@ export function ExpenseCategoryPickField({
           >
             <span className="min-w-0 flex-1 truncate">{displayLabel(opt)}</span>
             {value === opt ? (
-              <Check className="h-4 w-4 shrink-0 text-indigo-600" strokeWidth={2} aria-hidden />
+              <Check
+                className="h-4 w-4 shrink-0 text-indigo-600"
+                strokeWidth={2}
+                aria-hidden
+              />
             ) : (
               <span className="w-4 shrink-0" aria-hidden />
             )}
@@ -229,7 +239,11 @@ export function ExpenseCategoryPickField({
         onClick={() => {
           const next = !open;
           if (next && portal && btnRef.current) {
-            setPortalGeom(computeExpensePickerPortalMenuGeom(btnRef.current.getBoundingClientRect()));
+            setPortalGeom(
+              computeExpensePickerPortalMenuGeom(
+                btnRef.current.getBoundingClientRect(),
+              ),
+            );
           }
           if (!next) {
             setPortalGeom(null);
@@ -240,7 +254,10 @@ export function ExpenseCategoryPickField({
       >
         <span className="truncate">{displayLabel(value)}</span>
         <ChevronDown
-          className={cn("h-4 w-4 shrink-0 text-slate-400 transition-transform", open && "rotate-180")}
+          className={cn(
+            "h-4 w-4 shrink-0 text-slate-400 transition-transform",
+            open && "rotate-180",
+          )}
           strokeWidth={2}
           aria-hidden
         />

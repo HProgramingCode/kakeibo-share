@@ -1,8 +1,8 @@
 "use client";
 
 import type { TransferPreview } from "@/features/settlement/lib/settlement-transfers-preview";
-import { formatYen } from "@/shared/lib/format-yen";
-import { cn } from "@/shared/lib/utils";
+import { formatYen } from "@/lib/format-yen";
+import { cn } from "@/lib/utils";
 import { ArrowRight, ArrowRightLeft } from "lucide-react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 
@@ -20,7 +20,11 @@ export function BalanceHero({ currentUserId, transfers, nameByUserId }: Props) {
     ? { hidden: {}, show: {} }
     : {
         hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+        },
       };
 
   function partyLabel(userId: string): string {
@@ -42,13 +46,24 @@ export function BalanceHero({ currentUserId, transfers, nameByUserId }: Props) {
       animate="show"
       className="relative overflow-hidden rounded-[32px] bg-indigo-600 p-8 text-white shadow-2xl transition-all"
     >
-      <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-black/10 blur-2xl" aria-hidden />
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-3xl"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-black/10 blur-2xl"
+        aria-hidden
+      />
 
       <div className="relative z-10 space-y-5">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-base font-bold leading-snug text-white">現在の支払状況</p>
-          <ArrowRightLeft className="mt-0.5 h-6 w-6 shrink-0 opacity-60" aria-hidden />
+          <p className="text-base font-bold leading-snug text-white">
+            支払状況
+          </p>
+          <ArrowRightLeft
+            className="mt-0.5 h-6 w-6 shrink-0 opacity-60"
+            aria-hidden
+          />
         </div>
 
         {transfers.length === 0 ? (
@@ -63,11 +78,21 @@ export function BalanceHero({ currentUserId, transfers, nameByUserId }: Props) {
                 className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-sm backdrop-blur-[2px] sm:flex-nowrap sm:justify-between"
               >
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className={partyClass(t.from_user_id)} title={partyLabel(t.from_user_id)}>
+                  <span
+                    className={partyClass(t.from_user_id)}
+                    title={partyLabel(t.from_user_id)}
+                  >
                     {partyLabel(t.from_user_id)}
                   </span>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-white/55" strokeWidth={2} aria-hidden />
-                  <span className={partyClass(t.to_user_id)} title={partyLabel(t.to_user_id)}>
+                  <ArrowRight
+                    className="h-4 w-4 shrink-0 text-white/55"
+                    strokeWidth={2}
+                    aria-hidden
+                  />
+                  <span
+                    className={partyClass(t.to_user_id)}
+                    title={partyLabel(t.to_user_id)}
+                  >
                     {partyLabel(t.to_user_id)}
                   </span>
                 </div>

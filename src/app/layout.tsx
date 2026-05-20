@@ -26,8 +26,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-dvh bg-[#F8FAFC] font-sans text-slate-900 antialiased selection:bg-indigo-100">
-        <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col border-x border-slate-100 bg-white shadow-2xl">
+      <body className="min-h-dvh bg-gradient-to-b from-slate-100 via-[#F8FAFC] to-indigo-50/35 font-sans text-slate-900 antialiased selection:bg-indigo-100">
+        <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col border-x border-slate-200/60 bg-white shadow-2xl">
           <main className="flex-1 px-6 pb-10 pt-6">{children}</main>
         </div>
       </body>

@@ -3,7 +3,10 @@ import { computeParticipantShares } from "@/features/settlement/lib/dashboard-ba
 export type GroupSpendChartPoint = {
   month: string;
   monthlyTotal: number;
+  /** 表示期間の先頭月から当該月までの総額（内部計算や将来の別表示用） */
   cumulativeTotal: number;
+  /** 先頭月〜当該月までの月数での平均（円／月）。棒と同じ次元で並べ読みしやすい */
+  cumulativeMonthlyAverage: number;
 };
 
 type SpendRow = {
@@ -11,7 +14,7 @@ type SpendRow = {
   amount: number;
 };
 
-/** expense_date を YYYY-MM で暦月集計し、月ソート済みの累計（prefix sum）を返す */
+/** expense_date を YYYY-MM で暦月集計し、月ソート済みの累計と累進平均（各月での cumulativeTotal÷月数）を返す */
 export function buildMonthlySpendSeries(rows: SpendRow[]): GroupSpendChartPoint[] {
   const map = new Map<string, number>();
   for (const e of rows) {
@@ -21,10 +24,12 @@ export function buildMonthlySpendSeries(rows: SpendRow[]): GroupSpendChartPoint[
   }
   const months = [...map.keys()].sort((a, b) => a.localeCompare(b));
   let cumulativeTotal = 0;
-  return months.map((month) => {
+  return months.map((month, i) => {
     const monthlyTotal = map.get(month) ?? 0;
     cumulativeTotal += monthlyTotal;
-    return { month, monthlyTotal, cumulativeTotal };
+    const monthsCount = i + 1;
+    const cumulativeMonthlyAverage = Math.round(cumulativeTotal / monthsCount);
+    return { month, monthlyTotal, cumulativeTotal, cumulativeMonthlyAverage };
   });
 }
 

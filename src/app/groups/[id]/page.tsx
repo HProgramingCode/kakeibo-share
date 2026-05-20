@@ -1,1 +1,1 @@
-export { default } from "@/features/groups/ui/group-detail-screen";
+export { default } from "@/features/groups/group-detail/screen";
