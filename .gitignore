@@ -5,7 +5,7 @@
 /.next/
 /out/
 
-# env & secrets（本番・ローカルともリポジトリに含めない）
+# env & secrets（本番・ローカルともリポジトリに含めない。PC のみで管理）
 .env
 .env.local
 .env*.local
@@ -28,16 +28,16 @@ npm-debug.log*
 supabase/.temp/
 supabase/.env
 
-# IDE・エージェント（デプロイ時は不要、個人環境向け）
+# IDE・エージェント（デプロイ時は不要、PC のみで管理）
 /.vscode/
 /.cursor/
-/.claude/
+.claude/
 CLAUDE.md
 Claude.md
 /.idea/
 /.agents/
 /skills-lock.json
 
-# プロジェクト内ドキュメント・参照サンプル（アプリ実行には不要、ローカルで管理）
-/docs/
+# プロジェクト内ドキュメント・参照サンプル（アプリ実行には不要、PC のみで管理）
+docs/
 /sample/
