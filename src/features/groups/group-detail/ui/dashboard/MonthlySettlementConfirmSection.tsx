@@ -1,3 +1,4 @@
+import { YearMonthPickField } from "@/features/expenses/ui/YearMonthPickField";
 import { confirmMonthlySettlementAction } from "@/features/settlement/actions/settlement-actions";
 import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
 
@@ -20,16 +21,14 @@ export function MonthlySettlementConfirmSection({
       <div className="card-glass p-6">
         <form className="flex flex-col gap-5" action={confirmMonthlySettlementAction}>
           <input type="hidden" name="group_id" value={groupId} />
-          <label className="flex min-w-0 flex-col gap-2 text-sm">
+          <div className="flex min-w-0 flex-col gap-2 text-sm">
             <span className="font-semibold text-slate-700">対象月（JST）</span>
-            <input
-              className="input-field"
-              type="month"
+            <YearMonthPickField
               name="target_month"
-              required
               defaultValue={defaultTargetMonth}
+              required
             />
-          </label>
+          </div>
           <FormSubmitButton
             label="確定して記録を締める"
             pendingLabel="確定中..."

@@ -307,3 +307,45 @@ export async function updateExpenseAction(formData: FormData) {
 
   revalidatePath(groupDetailPath(groupId), "page");
 }
+
+export async function deleteExpenseAction(formData: FormData) {
+  const groupId = String(formData.get("group_id") ?? "").trim();
+  const expenseId = String(formData.get("expense_id") ?? "").trim();
+  if (!groupId || !expenseId) {
+    redirect(ROUTES.groups);
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await authRepo.getSessionUser(supabase);
+
+  if (!user) {
+    redirect(ROUTES.login);
+  }
+
+  const { data: existing, error: exErr } =
+    await expenseRepo.selectExpenseForUpdate(supabase, expenseId);
+
+  if (exErr || !existing || existing.group_id !== groupId) {
+    redirectGroupDetailWithError(groupId, "支出が見つかりません。");
+  }
+  if (existing.status !== "unpaid") {
+    redirectGroupDetailWithError(groupId, "精算済みの支出は削除できません。");
+  }
+
+  const { error: delErr } = await expenseRepo.deleteExpenseById(
+    supabase,
+    expenseId,
+  );
+
+  if (delErr) {
+    redirectGroupDetailWithError(
+      groupId,
+      delErr.message ?? "支出の削除に失敗しました。",
+    );
+  }
+
+  revalidatePath(groupDetailPath(groupId), "page");
+  redirect(groupDetailPath(groupId));
+}

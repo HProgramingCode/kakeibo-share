@@ -64,4 +64,9 @@
     -webkit-appearance: none;
     appearance: none;
   }
+
+  /** 年・月・日など複数 select を横並びにするとき用（chevron 余白を広げ文字を小さく） */
+  .input-field-select-compact {
+    @apply pr-11 text-xs;
+  }
 }
