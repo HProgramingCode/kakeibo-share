@@ -46,6 +46,20 @@ export async function selectOwnDisplayName(
     .maybeSingle();
 }
 
+export async function selectUnpaidExpensesForGroup(
+  client: SupabaseClient,
+  groupId: string,
+) {
+  return client
+    .from("expenses")
+    .select(
+      "id, amount, expense_date, title, category, payer_id, status, expense_participants ( user_id )",
+    )
+    .eq("group_id", groupId)
+    .eq("status", "unpaid")
+    .order("expense_date", { ascending: false });
+}
+
 export async function selectExpensesForGroup(
   client: SupabaseClient,
   groupId: string,

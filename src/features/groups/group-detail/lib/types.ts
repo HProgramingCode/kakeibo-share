@@ -29,6 +29,40 @@ export type BatchRow = {
     | null;
 };
 
+export type GroupDetailCoreLoadResult =
+  | { kind: "not_found" }
+  | { kind: "members_error"; message?: string }
+  | {
+      kind: "ok";
+      membershipRole: string;
+      members: MemberRow[];
+      groupLabel: string;
+      initialDisplayName: string;
+    };
+
+export type GroupDetailDashboardLoadResult =
+  | Exclude<GroupDetailCoreLoadResult, { kind: "ok" }>
+  | { kind: "expenses_error"; message: string }
+  | {
+      kind: "ok";
+      membershipRole: string;
+      members: MemberRow[];
+      groupLabel: string;
+      initialDisplayName: string;
+      unpaidExpenses: ExpenseRow[];
+    };
+
+export type GroupDetailHistoryLoadResult =
+  | { kind: "not_found" }
+  | { kind: "expenses_error"; message: string }
+  | { kind: "batches_error"; message: string }
+  | {
+      kind: "ok";
+      expenses: ExpenseRow[];
+      batches: BatchRow[];
+    };
+
+/** @deprecated loadGroupDetailDashboardData / loadGroupDetailHistoryData を使用 */
 export type GroupDetailPageLoadResult =
   | { kind: "not_found" }
   | { kind: "members_error"; message?: string }

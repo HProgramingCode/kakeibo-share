@@ -1,24 +1,15 @@
 import { LogoutConfirmForm } from "@/features/auth/ui/LogoutConfirmForm";
+import { requireAuthContext } from "@/features/auth/lib/require-auth-context";
 import { loadGroupListPageData } from "@/features/groups/lib/services/group-list-service";
 import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
 import { DeleteGroupConfirmForm } from "@/features/groups/ui/DeleteGroupConfirmForm";
 import Link from "next/link";
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
-import { createClient } from "@/server/supabase/server";
 import { EmptyState } from "@/features/shared/ui/EmptyState";
-import { ChevronRight, Plus, UsersRound } from "lucide-react";
+import { Plus, UsersRound } from "lucide-react";
 import { groupDetailPath, ROUTES } from "@/lib/routes";
-import { redirect } from "next/navigation";
 
 export default async function GroupsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase, user } = await requireAuthContext();
 
   const loadResult = await loadGroupListPageData(supabase, user.id);
 

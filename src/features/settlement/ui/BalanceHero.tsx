@@ -9,7 +9,7 @@ import { motion, useReducedMotion, type Variants } from "framer-motion";
 type Props = {
   currentUserId: string;
   transfers: TransferPreview[];
-  nameByUserId: Map<string, string>;
+  nameByUserId: Record<string, string>;
 };
 
 /** 未精算ベースの送金ペア一覧のみを表示するダッシュボード用カード */
@@ -28,7 +28,7 @@ export function BalanceHero({ currentUserId, transfers, nameByUserId }: Props) {
       };
 
   function partyLabel(userId: string): string {
-    return nameByUserId.get(userId) ?? userId;
+    return nameByUserId[userId] ?? userId;
   }
 
   function partyClass(userId: string): string {

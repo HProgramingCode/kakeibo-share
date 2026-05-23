@@ -1,6 +1,6 @@
 "use server";
 
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
 import * as expenseRepo from "@/features/expenses/lib/repositories/expense-repository";
 import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
 import {
@@ -9,7 +9,6 @@ import {
 } from "@/lib/expense-categories";
 import { redirectGroupDetailWithError } from "@/lib/redirect-group-detail";
 import { groupDetailPath, ROUTES } from "@/lib/routes";
-import { createClient } from "@/server/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -33,14 +32,7 @@ export async function createExpenseAction(formData: FormData) {
     );
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase } = await requireAuthForAction();
 
   const amountRaw = String(formData.get("amount") ?? "").trim();
   const amount = Number.parseInt(amountRaw, 10);
@@ -167,14 +159,7 @@ export async function updateExpenseAction(formData: FormData) {
     redirect(ROUTES.groups);
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase } = await requireAuthForAction();
 
   const { data: existing, error: exErr } =
     await expenseRepo.selectExpenseForUpdate(supabase, expenseId);
@@ -315,14 +300,7 @@ export async function deleteExpenseAction(formData: FormData) {
     redirect(ROUTES.groups);
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase } = await requireAuthForAction();
 
   const { data: existing, error: exErr } =
     await expenseRepo.selectExpenseForUpdate(supabase, expenseId);
