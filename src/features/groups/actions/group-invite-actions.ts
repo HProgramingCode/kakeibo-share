@@ -5,11 +5,13 @@ import {
   groupJoinPathWithToken,
   groupJoinPathWithTokenAndError,
 } from "@/features/groups/lib/group-invite-path";
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import {
+  isAuthActionError,
+  requireAuthForAction,
+} from "@/features/auth/lib/require-auth-for-action";
 import { selectMembershipRole } from "@/features/groups/lib/repositories/group-detail-repository";
 import * as groupWriteRepo from "@/features/groups/lib/repositories/group-write-repository";
 import { groupDetailPath } from "@/lib/routes";
-import { createClient } from "@/server/supabase/server";
 import { createHash, randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -26,13 +28,11 @@ export async function createGroupInviteAction(
     return { error: "グループが不正です" };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-  if (!user) {
-    return { error: "ログインが必要です" };
+  const auth = await requireAuthForAction({ mode: "returnError" });
+  if (isAuthActionError(auth)) {
+    return { error: auth.error };
   }
+  const { supabase, user } = auth;
 
   const { data: mem, error: memErr } = await selectMembershipRole(
     supabase,
@@ -76,7 +76,8 @@ export async function acceptGroupInviteAction(formData: FormData) {
     redirect(groupJoinPathWithError("招待リンクが無効です"));
   }
 
-  const supabase = await createClient();
+  const { supabase } = await requireAuthForAction();
+
   const { data, error } = await groupWriteRepo.acceptGroupInvite(
     supabase,
     token,

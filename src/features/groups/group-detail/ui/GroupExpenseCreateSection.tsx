@@ -1,4 +1,5 @@
 import { createExpenseAction } from "@/features/expenses/actions/expense-actions";
+import { ExpenseDatePickField } from "@/features/expenses/ui/ExpenseDatePickField";
 import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
 import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
 import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
@@ -43,16 +44,14 @@ export function GroupExpenseCreateSection({
                 required
               />
             </label>
-            <label className="flex min-w-0 flex-col gap-2 text-sm">
+            <div className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">支出日</span>
-              <input
-                className="input-field"
-                type="date"
+              <ExpenseDatePickField
                 name="expense_date"
-                required
                 defaultValue={defaultExpenseDate}
+                required
               />
-            </label>
+            </div>
             <label className="flex min-w-0 flex-col gap-2 text-sm">
               <span className="font-semibold text-slate-700">摘要</span>
               <input

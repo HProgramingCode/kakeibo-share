@@ -1,21 +1,22 @@
+import { requireAuthContext } from "@/features/auth/lib/require-auth-context";
 import {
-  buildGroupDetailViewModel,
+  buildGroupDetailCoreViewModel,
+  buildGroupDetailDashboardViewModel,
   currentMonthJstYm,
   todayJstYmd,
 } from "./lib/view-model";
-import { loadGroupDetailPageData } from "./lib/service";
+import { loadGroupDetailDashboardData } from "./lib/service";
 import type { GroupDetailPageProps } from "./lib/types";
 import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
 import { GroupDetailDashboardPanel } from "./ui/dashboard/GroupDetailDashboardPanel";
 import { GroupDetailFlashAlerts } from "./ui/GroupDetailFlashAlerts";
-import { GroupDetailHistoryPanel } from "./ui/history/GroupDetailHistoryPanel";
+import { GroupDetailHistoryPanelAsync } from "./ui/history/GroupDetailHistoryPanelAsync";
+import { GroupDetailHistoryPanelSkeleton } from "./ui/history/GroupDetailHistoryPanelSkeleton";
 import { GroupDetailScreenHeader } from "./ui/header/GroupDetailScreenHeader";
 import { GroupDetailTabs } from "./ui/GroupDetailTabs";
 import { GroupExpenseCreateSection } from "./ui/GroupExpenseCreateSection";
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
-import { createClient } from "@/server/supabase/server";
-import { ROUTES } from "@/lib/routes";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function GroupDetailPage({
   params,
@@ -26,16 +27,9 @@ export default async function GroupDetailPage({
   const queryError = sp?.error;
   const settledMonth = sp?.settled;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
+  const { supabase, user } = await requireAuthContext();
 
-  if (!user) {
-    redirect(ROUTES.login);
-  }
-
-  const loadResult = await loadGroupDetailPageData(supabase, {
+  const loadResult = await loadGroupDetailDashboardData(supabase, {
     groupId: id,
     userId: user.id,
   });
@@ -60,39 +54,25 @@ export default async function GroupDetailPage({
     );
   }
 
-  if (loadResult.kind === "batches_error") {
-    return (
-      <GroupsDestructiveAlert>
-        精算履歴の読み込みに失敗しました: {loadResult.message}
-      </GroupsDestructiveAlert>
-    );
-  }
-
   const {
     membershipRole,
     members,
     groupLabel,
     initialDisplayName,
-    expenses,
-    batches,
+    unpaidExpenses,
   } = loadResult;
 
-  const vm = buildGroupDetailViewModel(members, expenses);
-  const {
-    nameById,
-    transferPreview,
-    unpaidFeedItems,
-    settledFeedItems,
-    membersForExpenseEdit,
-    menuMembers,
-  } = vm;
+  const coreVm = buildGroupDetailCoreViewModel(members);
+  const dashboardVm = buildGroupDetailDashboardViewModel(members, unpaidExpenses);
+  const { nameByUserId, membersForExpenseEdit, menuMembers } = coreVm;
+  const { transferPreview, unpaidFeedItems } = dashboardVm;
 
   const dashboardSlot = (
     <GroupDetailDashboardPanel
       groupId={id}
       currentUserId={user.id}
       transferPreview={transferPreview}
-      nameByUserId={nameById}
+      nameByUserId={nameByUserId}
       unpaidFeedItems={unpaidFeedItems}
       membersForExpenseEdit={membersForExpenseEdit}
       defaultSettlementMonth={currentMonthJstYm()}
@@ -108,18 +88,16 @@ export default async function GroupDetailPage({
     />
   );
 
-  const currentMonth = currentMonthJstYm();
-
   const historySlot = (
-    <GroupDetailHistoryPanel
-      groupId={id}
-      settledFeedItems={settledFeedItems}
-      unpaidFeedItems={unpaidFeedItems}
-      membersForExpenseEdit={membersForExpenseEdit}
-      batches={batches}
-      nameByUserId={nameById}
-      initialMonth={currentMonth}
-    />
+    <Suspense fallback={<GroupDetailHistoryPanelSkeleton />}>
+      <GroupDetailHistoryPanelAsync
+        groupId={id}
+        userId={user.id}
+        members={members}
+        membersForExpenseEdit={membersForExpenseEdit}
+        nameByUserId={nameByUserId}
+      />
+    </Suspense>
   );
 
   return (

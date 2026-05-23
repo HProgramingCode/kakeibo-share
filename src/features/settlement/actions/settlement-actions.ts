@@ -1,11 +1,10 @@
 "use server";
 
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
 import * as settlementRepo from "@/features/settlement/lib/repositories/settlement-repository";
 import { mapConfirmMonthlySettlementRpcMessage } from "@/lib/map-confirm-monthly-settlement-message";
 import { redirectGroupDetailWithError } from "@/lib/redirect-group-detail";
 import { groupDetailPath, ROUTES } from "@/lib/routes";
-import { createClient } from "@/server/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,14 +14,7 @@ export async function confirmMonthlySettlementAction(formData: FormData) {
     redirect(ROUTES.groups);
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase } = await requireAuthForAction();
 
   const targetMonth = String(formData.get("target_month") ?? "").trim();
   if (!targetMonth || !/^\d{4}-\d{2}$/.test(targetMonth)) {

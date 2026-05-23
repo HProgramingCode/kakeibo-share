@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireAuthContext } from "@/features/auth/lib/require-auth-context";
 import { loadGroupSpendChartsPageData } from "@/features/groups/lib/services/group-spend-charts-service";
 import type { GroupSpendChartsPageProps } from "@/features/groups/lib/types/group-spend-charts-screen.types";
 import { GroupsDestructiveAlert } from "@/features/groups/shared/GroupsDestructiveAlert";
@@ -7,25 +8,16 @@ import {
   buildMonthlySpendSeries,
   buildParticipantShareTotalsByMonth,
 } from "@/features/settlement/lib/monthly-spend-series";
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
-import { createClient } from "@/server/supabase/server";
 import { BarChart3, ChevronLeft } from "lucide-react";
-import { groupDetailPath, ROUTES } from "@/lib/routes";
-import { notFound, redirect } from "next/navigation";
+import { groupDetailPath } from "@/lib/routes";
+import { notFound } from "next/navigation";
 
 export default async function GroupSpendChartsScreen({
   params,
 }: GroupSpendChartsPageProps) {
   const { id } = await params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase, user } = await requireAuthContext();
 
   const loadResult = await loadGroupSpendChartsPageData(supabase, {
     groupId: id,

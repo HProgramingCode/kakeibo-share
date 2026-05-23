@@ -9,7 +9,7 @@ type Props = {
   groupId: string;
   currentUserId: string;
   transferPreview: TransferPreview[];
-  nameByUserId: Map<string, string>;
+  nameByUserId: Record<string, string>;
   unpaidFeedItems: ExpenseFeedItemData[];
   membersForExpenseEdit: { user_id: string; label: string }[];
   defaultSettlementMonth: string;

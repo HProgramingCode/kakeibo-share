@@ -8,7 +8,7 @@ type Props = {
   unpaidFeedItems: ExpenseFeedItemData[];
   membersForExpenseEdit: { user_id: string; label: string }[];
   batches: BatchRow[];
-  nameByUserId: Map<string, string>;
+  nameByUserId: Record<string, string>;
   initialMonth: string;
 };
 
@@ -21,8 +21,6 @@ export function GroupDetailHistoryPanel({
   nameByUserId,
   initialMonth,
 }: Props) {
-  const nameRecord = Object.fromEntries(nameByUserId);
-
   return (
     <GroupDetailHistoryPanelClient
       groupId={groupId}
@@ -30,7 +28,7 @@ export function GroupDetailHistoryPanel({
       unpaidFeedItems={unpaidFeedItems}
       membersForExpenseEdit={membersForExpenseEdit}
       batches={batches}
-      nameByUserId={nameRecord}
+      nameByUserId={nameByUserId}
       initialMonth={initialMonth}
     />
   );

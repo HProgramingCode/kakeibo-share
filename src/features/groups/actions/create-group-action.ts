@@ -1,20 +1,12 @@
 "use server";
 
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
 import * as groupWriteRepo from "@/features/groups/lib/repositories/group-write-repository";
 import { ROUTES } from "@/lib/routes";
-import { createClient } from "@/server/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function createGroupAction(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase, user } = await requireAuthForAction();
 
   const name = String(formData.get("name") ?? "").trim();
 

@@ -1,8 +1,8 @@
 "use server";
 
 import { updateProfileDisplayName } from "@/features/auth/lib/services/profile-service";
+import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
 import { groupChartsPath, groupDetailPath } from "@/lib/routes";
-import { createClient } from "@/server/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function updateProfileDisplayNameAction(
@@ -15,15 +15,18 @@ export async function updateProfileDisplayNameAction(
     return { error: "グループが不正です" };
   }
 
-  const supabase = await createClient();
-  const result = await updateProfileDisplayName(supabase, { displayNameRaw });
+  const auth = await requireAuthForAction({ mode: "returnError" });
+  if (!auth.ok) {
+    return { error: auth.error };
+  }
+
+  const result = await updateProfileDisplayName(auth.supabase, {
+    userId: auth.user.id,
+    displayNameRaw,
+  });
 
   if (result.kind === "validation" || result.kind === "db") {
     return { error: result.message };
-  }
-
-  if (result.kind === "unauthorized") {
-    return { error: "ログインが必要です" };
   }
 
   revalidatePath(groupDetailPath(groupId));

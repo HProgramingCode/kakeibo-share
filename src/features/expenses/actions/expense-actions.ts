@@ -1,6 +1,6 @@
 "use server";
 
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
+import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
 import * as expenseRepo from "@/features/expenses/lib/repositories/expense-repository";
 import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
 import {
@@ -9,7 +9,6 @@ import {
 } from "@/lib/expense-categories";
 import { redirectGroupDetailWithError } from "@/lib/redirect-group-detail";
 import { groupDetailPath, ROUTES } from "@/lib/routes";
-import { createClient } from "@/server/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -33,14 +32,7 @@ export async function createExpenseAction(formData: FormData) {
     );
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase } = await requireAuthForAction();
 
   const amountRaw = String(formData.get("amount") ?? "").trim();
   const amount = Number.parseInt(amountRaw, 10);
@@ -167,14 +159,7 @@ export async function updateExpenseAction(formData: FormData) {
     redirect(ROUTES.groups);
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
-
-  if (!user) {
-    redirect(ROUTES.login);
-  }
+  const { supabase } = await requireAuthForAction();
 
   const { data: existing, error: exErr } =
     await expenseRepo.selectExpenseForUpdate(supabase, expenseId);
@@ -306,4 +291,39 @@ export async function updateExpenseAction(formData: FormData) {
   }
 
   revalidatePath(groupDetailPath(groupId), "page");
+}
+
+export async function deleteExpenseAction(formData: FormData) {
+  const groupId = String(formData.get("group_id") ?? "").trim();
+  const expenseId = String(formData.get("expense_id") ?? "").trim();
+  if (!groupId || !expenseId) {
+    redirect(ROUTES.groups);
+  }
+
+  const { supabase } = await requireAuthForAction();
+
+  const { data: existing, error: exErr } =
+    await expenseRepo.selectExpenseForUpdate(supabase, expenseId);
+
+  if (exErr || !existing || existing.group_id !== groupId) {
+    redirectGroupDetailWithError(groupId, "支出が見つかりません。");
+  }
+  if (existing.status !== "unpaid") {
+    redirectGroupDetailWithError(groupId, "精算済みの支出は削除できません。");
+  }
+
+  const { error: delErr } = await expenseRepo.deleteExpenseById(
+    supabase,
+    expenseId,
+  );
+
+  if (delErr) {
+    redirectGroupDetailWithError(
+      groupId,
+      delErr.message ?? "支出の削除に失敗しました。",
+    );
+  }
+
+  revalidatePath(groupDetailPath(groupId), "page");
+  redirect(groupDetailPath(groupId));
 }

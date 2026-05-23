@@ -4,8 +4,7 @@ import { groupJoinPathWithToken } from "@/features/groups/lib/group-invite-path"
 import { safeAuthRedirectPath } from "@/lib/auth-redirect";
 import { ROUTES } from "@/lib/routes";
 import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
-import { createClient } from "@/server/supabase/server";
+import { getOptionalAuthContext } from "@/features/auth/lib/require-auth-context";
 import { LogIn, UserPlus } from "lucide-react";
 
 type Props = {
@@ -34,10 +33,7 @@ export default async function JoinPage({ searchParams }: Props) {
     );
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await authRepo.getSessionUser(supabase);
+  const { user } = await getOptionalAuthContext();
 
   const nextJoin = safeAuthRedirectPath(groupJoinPathWithToken(token));
 
