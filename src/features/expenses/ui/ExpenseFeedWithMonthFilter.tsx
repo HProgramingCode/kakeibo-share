@@ -2,7 +2,7 @@
 
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
 import { ExpenseFeed } from "@/features/expenses/ui/ExpenseFeed";
-import type { MemberForExpenseEdit } from "@/features/expenses/ui/ExpenseEditSheet";
+import type { MemberForExpenseEdit } from "@/features/expenses/lib/types/expense-member";
 import { useMemo, useState } from "react";
 
 type Props = {

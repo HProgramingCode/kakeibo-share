@@ -1,3 +1,5 @@
+import type { ExpenseSplitMode } from "@/features/expenses/lib/split-mode";
+
 export type ExpenseFeedItemData = {
   id: string;
   amount: number;
@@ -9,5 +11,7 @@ export type ExpenseFeedItemData = {
   participantCount: number;
   payerId?: string;
   participantIds?: string[];
+  splitMode?: ExpenseSplitMode;
+  participantShares?: Record<string, number>;
   editable?: boolean;
 };

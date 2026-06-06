@@ -4,16 +4,16 @@ import {
   deleteGroupAction,
   type DeleteGroupResult,
 } from "@/features/groups/actions/delete-group-action";
+import { BottomSheetDialog } from "@/features/shared/ui/BottomSheetDialog";
 import { PendingButton } from "@/features/shared/ui/PendingButton";
 import { Trash2, X } from "lucide-react";
 import {
   useCallback,
-  useEffect,
   useId,
   useState,
   type ReactNode,
 } from "react";
-import { createPortal, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { useActionState } from "react";
 
 type Props = {
@@ -104,63 +104,10 @@ export function DeleteGroupConfirmForm({
 }: Props) {
   const titleId = useId();
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [state, formAction] = useActionState(deleteGroupAction, initialState);
   const errorMessage = state.ok === false ? state.error : null;
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const close = useCallback(() => setOpen(false), []);
-
-  useEffect(() => {
-    if (!open) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, close]);
-
-  const overlay =
-    open && mounted ? (
-      <div
-        className="fixed inset-0 z-[220] flex items-end justify-center sm:items-center sm:p-4"
-        role="presentation"
-      >
-        <button
-          type="button"
-          className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
-          aria-label="閉じる"
-          onClick={close}
-        />
-        <div
-          className="relative z-10 w-full max-w-md rounded-t-[28px] border border-slate-100 bg-white p-6 shadow-2xl sm:rounded-[28px]"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={titleId}
-          style={{
-            paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))",
-          }}
-        >
-          <form action={formAction}>
-            <input type="hidden" name="group_id" value={groupId} />
-            <DeleteGroupFormFields
-              titleId={titleId}
-              groupName={groupName}
-              onClose={close}
-              errorMessage={errorMessage}
-            />
-          </form>
-        </div>
-      </div>
-    ) : null;
 
   return (
     <>
@@ -178,7 +125,24 @@ export function DeleteGroupConfirmForm({
           {children ?? "削除"}
         </button>
       </div>
-      {mounted && overlay ? createPortal(overlay, document.body) : null}
+      <BottomSheetDialog
+        open={open}
+        onClose={close}
+        titleId={titleId}
+        title="グループを削除しますか？"
+        zIndex={220}
+        compact
+      >
+        <form action={formAction}>
+          <input type="hidden" name="group_id" value={groupId} />
+          <DeleteGroupFormFields
+            titleId={titleId}
+            groupName={groupName}
+            onClose={close}
+            errorMessage={errorMessage}
+          />
+        </form>
+      </BottomSheetDialog>
     </>
   );
 }

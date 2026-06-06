@@ -1,6 +1,11 @@
 "use server";
 
 import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
+import {
+  parseParticipantIds,
+  parseSplitModeFromForm,
+  validateExpenseParticipantSharesFromForm,
+} from "@/features/expenses/lib/parse-expense-shares-form";
 import * as expenseRepo from "@/features/expenses/lib/repositories/expense-repository";
 import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
 import {
@@ -61,20 +66,28 @@ export async function createExpenseAction(formData: FormData) {
     redirectGroupDetailWithError(groupId, "立替者を選択してください。");
   }
 
-  const participantIds = [
-    ...new Set(
-      formData
-        .getAll("participant")
-        .map((v) => String(v).trim())
-        .filter(Boolean),
-    ),
-  ];
+  const splitMode = parseSplitModeFromForm(formData);
+  if (!splitMode) {
+    redirectGroupDetailWithError(groupId, "分割方式が不正です。");
+  }
+
+  const participantIds = parseParticipantIds(formData);
 
   if (participantIds.length === 0) {
     redirectGroupDetailWithError(
       groupId,
       "負担に含めるメンバーを1人以上選んでください。",
     );
+  }
+
+  const shareValidation = validateExpenseParticipantSharesFromForm(
+    amount,
+    splitMode,
+    participantIds,
+    formData,
+  );
+  if (!shareValidation.ok) {
+    redirectGroupDetailWithError(groupId, shareValidation.message);
   }
 
   const { data: membersRaw, error: memErr } = await selectGroupMemberUserIds(
@@ -116,6 +129,7 @@ export async function createExpenseAction(formData: FormData) {
       category,
       client_request_id: clientRequestId,
       status: "unpaid",
+      split_mode: splitMode,
     },
   );
 
@@ -134,6 +148,10 @@ export async function createExpenseAction(formData: FormData) {
   const parts = participantIds.map((user_id) => ({
     expense_id: newExpenseId,
     user_id,
+    share_amount:
+      splitMode === "exact"
+        ? (shareValidation.shares.get(user_id) ?? null)
+        : null,
   }));
 
   const { error: partErr } = await expenseRepo.insertExpenseParticipants(
@@ -198,20 +216,28 @@ export async function updateExpenseAction(formData: FormData) {
     redirectGroupDetailWithError(groupId, "立替者を選択してください。");
   }
 
-  const participantIds = [
-    ...new Set(
-      formData
-        .getAll("participant")
-        .map((v) => String(v).trim())
-        .filter(Boolean),
-    ),
-  ];
+  const splitMode = parseSplitModeFromForm(formData);
+  if (!splitMode) {
+    redirectGroupDetailWithError(groupId, "分割方式が不正です。");
+  }
+
+  const participantIds = parseParticipantIds(formData);
 
   if (participantIds.length === 0) {
     redirectGroupDetailWithError(
       groupId,
       "負担に含めるメンバーを1人以上選んでください。",
     );
+  }
+
+  const shareValidation = validateExpenseParticipantSharesFromForm(
+    amount,
+    splitMode,
+    participantIds,
+    formData,
+  );
+  if (!shareValidation.ok) {
+    redirectGroupDetailWithError(groupId, shareValidation.message);
   }
 
   const { data: membersRaw, error: memErr } = await selectGroupMemberUserIds(
@@ -251,6 +277,7 @@ export async function updateExpenseAction(formData: FormData) {
       expense_date: expenseDate,
       title,
       category,
+      split_mode: splitMode,
     },
   );
 
@@ -276,6 +303,10 @@ export async function updateExpenseAction(formData: FormData) {
   const parts = participantIds.map((user_id) => ({
     expense_id: expenseId,
     user_id,
+    share_amount:
+      splitMode === "exact"
+        ? (shareValidation.shares.get(user_id) ?? null)
+        : null,
   }));
 
   const { error: partErr } = await expenseRepo.insertExpenseParticipants(

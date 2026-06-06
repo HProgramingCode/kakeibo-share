@@ -1,7 +1,19 @@
+import type { ExpenseSplitMode } from "@/features/expenses/lib/split-mode";
+
 export type ExpenseForBalance = {
   amount: number;
   payer_id: string;
   participant_ids: string[];
+  split_mode?: ExpenseSplitMode;
+  share_amounts?: Record<string, number>;
+};
+
+export type ExpenseShareInput = {
+  amount: number;
+  payerId: string;
+  participantIds: string[];
+  splitMode: ExpenseSplitMode;
+  shareAmounts?: Map<string, number> | Record<string, number>;
 };
 
 /**
@@ -27,9 +39,32 @@ export function computeParticipantShares(
   return shares;
 }
 
+function toShareMap(
+  shareAmounts?: Map<string, number> | Record<string, number>,
+): Map<string, number> | null {
+  if (!shareAmounts) return null;
+  if (shareAmounts instanceof Map) return shareAmounts;
+  return new Map(Object.entries(shareAmounts));
+}
+
+/**
+ * 分割方式に応じた負担額 Map を返す。
+ */
+export function computeExpenseShares(input: ExpenseShareInput): Map<string, number> {
+  const { amount, payerId, participantIds, splitMode } = input;
+  if (splitMode === "exact") {
+    const shares = toShareMap(input.shareAmounts) ?? new Map<string, number>();
+    return new Map(
+      participantIds
+        .filter((uid) => shares.has(uid))
+        .map((uid) => [uid, shares.get(uid)!]),
+    );
+  }
+  return computeParticipantShares(amount, payerId, participantIds);
+}
+
 /**
  * 未精算支出の合計で、ユーザーごとのネット（プラス＝貸し、マイナス＝借り）。
- * 均等割の端数は立替者負担に寄せる（DB の精算 RPC と同一ルール）。
  */
 export function computeNetBalancesByUser(
   expenses: ExpenseForBalance[],
@@ -42,7 +77,13 @@ export function computeNetBalancesByUser(
 
     net.set(e.payer_id, (net.get(e.payer_id) ?? 0) + e.amount);
 
-    const shares = computeParticipantShares(e.amount, e.payer_id, e.participant_ids);
+    const shares = computeExpenseShares({
+      amount: e.amount,
+      payerId: e.payer_id,
+      participantIds: e.participant_ids,
+      splitMode: e.split_mode ?? "equal",
+      shareAmounts: e.share_amounts,
+    });
     for (const [uid, share] of shares) {
       net.set(uid, (net.get(uid) ?? 0) - share);
     }

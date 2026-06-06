@@ -53,7 +53,7 @@ export async function selectUnpaidExpensesForGroup(
   return client
     .from("expenses")
     .select(
-      "id, amount, expense_date, title, category, payer_id, status, expense_participants ( user_id )",
+      "id, amount, expense_date, title, category, payer_id, status, split_mode, expense_participants ( user_id, share_amount )",
     )
     .eq("group_id", groupId)
     .eq("status", "unpaid")
@@ -67,7 +67,7 @@ export async function selectExpensesForGroup(
   return client
     .from("expenses")
     .select(
-      "id, amount, expense_date, title, category, payer_id, status, expense_participants ( user_id )",
+      "id, amount, expense_date, title, category, payer_id, status, split_mode, expense_participants ( user_id, share_amount )",
     )
     .eq("group_id", groupId)
     .order("expense_date", { ascending: false });
@@ -102,7 +102,9 @@ export async function selectExpensesForCharts(
 ) {
   return client
     .from("expenses")
-    .select("amount, expense_date, payer_id, expense_participants ( user_id )")
+    .select(
+      "amount, expense_date, payer_id, split_mode, expense_participants ( user_id, share_amount )",
+    )
     .eq("group_id", groupId)
     .order("expense_date", { ascending: false });
 }

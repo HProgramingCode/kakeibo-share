@@ -1,8 +1,4 @@
-import { createExpenseAction } from "@/features/expenses/actions/expense-actions";
-import { ExpenseDatePickField } from "@/features/expenses/ui/ExpenseDatePickField";
-import { ExpenseCategoryPickField } from "@/features/expenses/ui/ExpenseCategoryPickField";
-import { ExpenseParticipantSharesSection } from "@/features/expenses/ui/ExpenseParticipantSharesSection";
-import { FormSubmitButton } from "@/features/shared/ui/FormSubmitButton";
+import { GroupExpenseCreateForm } from "@/features/groups/group-detail/ui/GroupExpenseCreateForm";
 
 type Props = {
   groupId: string;
@@ -30,46 +26,13 @@ export function GroupExpenseCreateSection({
         </div>
 
         <div className="card-glass p-6">
-          <form className="flex flex-col gap-5" action={createExpenseAction}>
-            <input type="hidden" name="group_id" value={groupId} />
-            <input type="hidden" name="client_request_id" value={clientRequestId} />
-            <label className="flex min-w-0 flex-col gap-2 text-sm">
-              <span className="font-semibold text-slate-700">金額（円）</span>
-              <input
-                className="input-field"
-                type="number"
-                name="amount"
-                min={1}
-                step={1}
-                required
-              />
-            </label>
-            <div className="flex min-w-0 flex-col gap-2 text-sm">
-              <span className="font-semibold text-slate-700">支出日</span>
-              <ExpenseDatePickField
-                name="expense_date"
-                defaultValue={defaultExpenseDate}
-                required
-              />
-            </div>
-            <label className="flex min-w-0 flex-col gap-2 text-sm">
-              <span className="font-semibold text-slate-700">摘要</span>
-              <input
-                className="input-field"
-                name="title"
-                placeholder="例: スーパー"
-              />
-            </label>
-            <div className="flex min-w-0 flex-col gap-2 text-sm">
-              <span className="font-semibold text-slate-700">カテゴリ</span>
-              <ExpenseCategoryPickField defaultValue="" />
-            </div>
-            <ExpenseParticipantSharesSection
-              members={membersForEdit}
-              initialPayerId={currentUserId}
-            />
-            <FormSubmitButton label="登録" pendingLabel="登録中..." />
-          </form>
+          <GroupExpenseCreateForm
+            groupId={groupId}
+            currentUserId={currentUserId}
+            membersForEdit={membersForEdit}
+            defaultExpenseDate={defaultExpenseDate}
+            clientRequestId={clientRequestId}
+          />
         </div>
       </section>
     </div>

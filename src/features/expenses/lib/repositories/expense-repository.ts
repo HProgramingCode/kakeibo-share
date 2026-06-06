@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { ExpenseSplitMode } from "@/features/expenses/lib/split-mode";
 import type { ExpenseCategory } from "@/lib/expense-categories";
 
 export type InsertExpenseRow = {
@@ -11,6 +12,7 @@ export type InsertExpenseRow = {
   category: ExpenseCategory | null;
   client_request_id: string;
   status: "unpaid";
+  split_mode: ExpenseSplitMode;
 };
 
 export async function insertExpense(
@@ -23,6 +25,7 @@ export async function insertExpense(
 export type ExpenseParticipantRow = {
   expense_id: string;
   user_id: string;
+  share_amount: number | null;
 };
 
 export async function insertExpenseParticipants(
@@ -56,6 +59,7 @@ export type UpdateExpenseRow = {
   expense_date: string;
   title: string | null;
   category: ExpenseCategory | null;
+  split_mode: ExpenseSplitMode;
 };
 
 export async function updateExpense(
