@@ -11,7 +11,10 @@ export type GroupSpendChartsExpenseRow = {
   amount: number;
   expense_date: string;
   payer_id: string;
-  expense_participants: { user_id: string }[] | null;
+  split_mode: string;
+  expense_participants:
+    | { user_id: string; share_amount: number | null }[]
+    | null;
 };
 
 export type GroupSpendChartsPageLoadResult =

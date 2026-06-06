@@ -7,12 +7,14 @@ type Props = {
   label: string;
   pendingLabel: string;
   className?: string;
+  disabled?: boolean;
 };
 
 export function FormSubmitButton({
   label,
   pendingLabel,
   className = "btn-primary w-full",
+  disabled = false,
 }: Props) {
   const { pending } = useFormStatus();
 
@@ -21,6 +23,7 @@ export function FormSubmitButton({
       type="submit"
       pending={pending}
       pendingLabel={pendingLabel}
+      disabled={disabled}
       className={className}
     >
       {label}

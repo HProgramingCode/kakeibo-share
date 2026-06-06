@@ -17,7 +17,10 @@ export type ExpenseRow = {
   category: string | null;
   payer_id: string;
   status: string;
-  expense_participants: { user_id: string }[] | null;
+  split_mode: string;
+  expense_participants:
+    | { user_id: string; share_amount: number | null }[]
+    | null;
 };
 
 export type BatchRow = {

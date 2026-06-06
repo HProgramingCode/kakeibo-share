@@ -1,4 +1,5 @@
-import { computeParticipantShares } from "@/features/settlement/lib/dashboard-balances";
+import { computeExpenseShares } from "@/features/settlement/lib/dashboard-balances";
+import type { ExpenseSplitMode } from "@/features/expenses/lib/split-mode";
 
 export type GroupSpendChartPoint = {
   month: string;
@@ -43,17 +44,26 @@ export type ChartExpenseRow = {
 /** YYYY-MM ごとの user_id → その月のユーザー別合計（グラフ下の内訳用） */
 export type PayerTotalsByMonth = Record<string, Record<string, number>>;
 
-/** 均等割の負担額を月×ユーザーで合計（端数ルールは computeParticipantShares と同一） */
 export type ChartExpenseForSharesRow = ChartExpenseRow & {
   participant_ids: string[];
+  split_mode?: ExpenseSplitMode;
+  share_amounts?: Record<string, number>;
 };
 
-export function buildParticipantShareTotalsByMonth(rows: ChartExpenseForSharesRow[]): PayerTotalsByMonth {
+export function buildParticipantShareTotalsByMonth(
+  rows: ChartExpenseForSharesRow[],
+): PayerTotalsByMonth {
   const out: PayerTotalsByMonth = {};
   for (const e of rows) {
     const d = e.expense_date.trim();
     const ym = d.length >= 7 ? d.slice(0, 7) : d;
-    const shares = computeParticipantShares(e.amount, e.payer_id, e.participant_ids);
+    const shares = computeExpenseShares({
+      amount: e.amount,
+      payerId: e.payer_id,
+      participantIds: e.participant_ids,
+      splitMode: e.split_mode ?? "equal",
+      shareAmounts: e.share_amounts,
+    });
     if (shares.size === 0) continue;
     if (!out[ym]) out[ym] = {};
     const bucket = out[ym];

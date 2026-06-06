@@ -1,4 +1,5 @@
 import type { ExpenseFeedItemData } from "@/features/expenses/lib/expense-feed-item";
+import type { ExpenseSplitMode } from "@/features/expenses/lib/split-mode";
 import type { ExpenseRow, MemberRow } from "./types";
 import {
   computeNetBalancesByUser,
@@ -46,11 +47,24 @@ function buildNameByUserId(members: MemberRow[]): Record<string, string> {
   return nameByUserId;
 }
 
+function parseSplitMode(raw: string): ExpenseSplitMode {
+  return raw === "exact" ? "exact" : "equal";
+}
+
 function toFeedItems(
   rows: ExpenseRow[],
   nameByUserId: Record<string, string>,
 ): ExpenseFeedItemData[] {
   return rows.map((e) => {
+    const participants = e.expense_participants ?? [];
+    const splitMode = parseSplitMode(e.split_mode ?? "equal");
+    const participantShares: Record<string, number> = {};
+    for (const p of participants) {
+      if (p.share_amount != null) {
+        participantShares[p.user_id] = p.share_amount;
+      }
+    }
+
     const base: ExpenseFeedItemData = {
       id: e.id,
       amount: e.amount,
@@ -58,8 +72,8 @@ function toFeedItems(
       title: e.title,
       category: e.category,
       payerLabel: nameByUserId[e.payer_id] ?? e.payer_id,
-      participantCount: (e.expense_participants ?? []).length,
-      participantsLine: `負担: ${(e.expense_participants ?? [])
+      participantCount: participants.length,
+      participantsLine: `負担: ${participants
         .map((p) => nameByUserId[p.user_id] ?? p.user_id)
         .join("・")}`,
     };
@@ -67,7 +81,10 @@ function toFeedItems(
     return {
       ...base,
       payerId: e.payer_id,
-      participantIds: (e.expense_participants ?? []).map((p) => p.user_id),
+      participantIds: participants.map((p) => p.user_id),
+      splitMode,
+      participantShares:
+        splitMode === "exact" ? participantShares : undefined,
       editable: true,
     };
   });
@@ -108,11 +125,25 @@ export function buildGroupDetailDashboardViewModel(
   unpaidExpenses: ExpenseRow[],
 ): GroupDetailDashboardViewModel {
   const nameByUserId = buildNameByUserId(members);
-  const balancesInput: ExpenseForBalance[] = unpaidExpenses.map((e) => ({
-    amount: e.amount,
-    payer_id: e.payer_id,
-    participant_ids: (e.expense_participants ?? []).map((p) => p.user_id),
-  }));
+  const balancesInput: ExpenseForBalance[] = unpaidExpenses.map((e) => {
+    const participants = e.expense_participants ?? [];
+    const share_amounts: Record<string, number> = {};
+    for (const p of participants) {
+      if (p.share_amount != null) {
+        share_amounts[p.user_id] = p.share_amount;
+      }
+    }
+    return {
+      amount: e.amount,
+      payer_id: e.payer_id,
+      participant_ids: participants.map((p) => p.user_id),
+      split_mode: parseSplitMode(e.split_mode ?? "equal"),
+      share_amounts:
+        parseSplitMode(e.split_mode ?? "equal") === "exact"
+          ? share_amounts
+          : undefined,
+    };
+  });
   const netByUser = computeNetBalancesByUser(balancesInput);
   const transferPreview = computeGreedySettlementTransfers(netByUser);
   const unpaidFeedItems = toFeedItems(unpaidExpenses, nameByUserId);
