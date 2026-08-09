@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import {
   OAUTH_SIGNUP_DISPLAY_NAME_COOKIE,
   OAUTH_SIGNUP_DISPLAY_NAME_MAX,
-} from "@/features/auth/lib/oauth-display-name-cookie";
+} from "@/features/auth/model/oauth-display-name-cookie";
 
 export async function setOAuthSignupDisplayNameCookie(
   displayName: string,

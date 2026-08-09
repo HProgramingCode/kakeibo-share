@@ -30,7 +30,15 @@ npm run dev
 
 | パス | 内容 |
 |------|------|
-| `src/app` | Next.js App Router |
+| `src/app` | Next.js App Router。各 `page.tsx` がデータ取得・エラー分岐・画面の組み立てを担当します。 |
+| `src/app/**/_components` | そのルートだけで使う画面部品。`_` 始まりのためURLにはなりません。 |
+| `src/app/**/_lib` | そのルートだけで使う表示用の型・整形・フィルター。 |
+| `src/features/<domain>/actions` | Server Action。入力検証、再検証、リダイレクトを担当します。 |
+| `src/features/<domain>/repositories` | Supabase の `.from()` / `.rpc()` を集約します。 |
+| `src/features/<domain>/model` | ドメインの型、計算、入力解析、バリデーションを置きます。 |
+| `src/features/<domain>/components` | 複数ルートから再利用するドメイン部品です。 |
+| `src/features/<domain>/server` | 認証・メンバーシップ確認などサーバー専用の補助処理です。 |
+| `src/shared` | ナビゲーション、整形、汎用UI・hookなどドメイン非依存の共通基盤です。 |
 | `supabase/migrations` | SQL マイグレーション |
 
 ## メモ

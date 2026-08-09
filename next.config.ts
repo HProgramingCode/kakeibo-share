@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-import { ROUTES } from "./src/lib/routes";
+import { ROUTES } from "./src/shared/navigation/routes";
 
 const nextConfig: NextConfig = {
   async redirects() {

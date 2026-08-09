@@ -1,19 +1,19 @@
 "use server";
 
-import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
+import { requireAuthForAction } from "@/features/auth/server/require-auth-for-action";
 import {
   parseParticipantIds,
   parseSplitModeFromForm,
   validateExpenseParticipantSharesFromForm,
-} from "@/features/expenses/lib/parse-expense-shares-form";
-import * as expenseRepo from "@/features/expenses/lib/repositories/expense-repository";
-import { selectGroupMemberUserIds } from "@/features/groups/lib/repositories/group-detail-repository";
+} from "@/features/expenses/form/model/parse-expense-shares-form";
+import * as expenseRepo from "@/features/expenses/repositories/expense-repository";
+import { selectGroupMemberUserIds } from "@/features/groups/repositories/group-detail-repository";
 import {
   EXPENSE_CATEGORY_OPTIONS,
   type ExpenseCategory,
-} from "@/lib/expense-categories";
-import { redirectGroupDetailWithError } from "@/lib/redirect-group-detail";
-import { groupDetailPath, ROUTES } from "@/lib/routes";
+} from "@/features/expenses/form/model/expense-categories";
+import { redirectGroupDetailWithError } from "@/shared/navigation/redirect-group-detail";
+import { groupDetailPath, ROUTES } from "@/shared/navigation/routes";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -118,23 +118,28 @@ export async function createExpenseAction(formData: FormData) {
     }
   }
 
-  const { data: inserted, error: insErr } = await expenseRepo.insertExpense(
+  const participants = participantIds.map((userId) => ({
+    userId,
+    shareAmount:
+      splitMode === "exact" ? (shareValidation.shares.get(userId) ?? null) : null,
+  }));
+
+  const { error: insErr } = await expenseRepo.createExpenseWithParticipants(
     supabase,
     {
-      group_id: groupId,
-      payer_id: payerId,
+      groupId,
+      payerId,
       amount,
-      expense_date: expenseDate,
+      expenseDate,
       title,
       category,
-      client_request_id: clientRequestId,
-      status: "unpaid",
-      split_mode: splitMode,
+      clientRequestId,
+      splitMode,
+      participants,
     },
   );
 
-  const newExpenseId = inserted?.id;
-  if (insErr || newExpenseId == null) {
+  if (insErr) {
     if (insErr?.code === "23505") {
       revalidatePath(groupDetailPath(groupId), "page");
       return;
@@ -145,29 +150,8 @@ export async function createExpenseAction(formData: FormData) {
     );
   }
 
-  const parts = participantIds.map((user_id) => ({
-    expense_id: newExpenseId,
-    user_id,
-    share_amount:
-      splitMode === "exact"
-        ? (shareValidation.shares.get(user_id) ?? null)
-        : null,
-  }));
-
-  const { error: partErr } = await expenseRepo.insertExpenseParticipants(
-    supabase,
-    parts,
-  );
-
-  if (partErr) {
-    await expenseRepo.deleteExpenseById(supabase, newExpenseId);
-    redirectGroupDetailWithError(
-      groupId,
-      partErr.message ?? "負担メンバーの保存に失敗しました。",
-    );
-  }
-
   revalidatePath(groupDetailPath(groupId), "page");
+  redirect(`${groupDetailPath(groupId)}?created=1`);
 }
 
 export async function updateExpenseAction(formData: FormData) {
@@ -268,16 +252,24 @@ export async function updateExpenseAction(formData: FormData) {
     }
   }
 
-  const { error: updErr } = await expenseRepo.updateExpense(
+  const participants = participantIds.map((userId) => ({
+    userId,
+    shareAmount:
+      splitMode === "exact" ? (shareValidation.shares.get(userId) ?? null) : null,
+  }));
+
+  const { error: updErr } = await expenseRepo.updateExpenseWithParticipants(
     supabase,
     expenseId,
     {
-      payer_id: payerId,
+      groupId,
+      payerId,
       amount,
-      expense_date: expenseDate,
+      expenseDate,
       title,
       category,
-      split_mode: splitMode,
+      splitMode,
+      participants,
     },
   );
 
@@ -285,39 +277,6 @@ export async function updateExpenseAction(formData: FormData) {
     redirectGroupDetailWithError(
       groupId,
       updErr.message ?? "支出の更新に失敗しました。",
-    );
-  }
-
-  const { error: delErr } = await expenseRepo.deleteExpenseParticipants(
-    supabase,
-    expenseId,
-  );
-
-  if (delErr) {
-    redirectGroupDetailWithError(
-      groupId,
-      delErr.message ?? "負担メンバーの更新に失敗しました。",
-    );
-  }
-
-  const parts = participantIds.map((user_id) => ({
-    expense_id: expenseId,
-    user_id,
-    share_amount:
-      splitMode === "exact"
-        ? (shareValidation.shares.get(user_id) ?? null)
-        : null,
-  }));
-
-  const { error: partErr } = await expenseRepo.insertExpenseParticipants(
-    supabase,
-    parts,
-  );
-
-  if (partErr) {
-    redirectGroupDetailWithError(
-      groupId,
-      partErr.message ?? "負担メンバーの保存に失敗しました。",
     );
   }
 

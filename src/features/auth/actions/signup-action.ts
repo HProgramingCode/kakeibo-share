@@ -1,10 +1,10 @@
 "use server";
 
-import { authPathWithNext } from "@/features/auth/lib/build-auth-next-query";
-import { signUpWithEmailPassword } from "@/features/auth/lib/services/signup-service";
-import type { AuthFormResult } from "@/features/auth/types/auth-form-result";
-import { safeAuthRedirectPath } from "@/lib/auth-redirect";
-import { ROUTES } from "@/lib/routes";
+import { authPathWithNext } from "@/features/auth/model/build-auth-next-query";
+import { signUpWithEmailPassword } from "@/features/auth/server/signup-service";
+import type { AuthFormResult } from "@/features/auth/model/auth-form-result";
+import { safeAuthRedirectPath } from "@/shared/navigation/auth-redirect";
+import { ROUTES } from "@/shared/navigation/routes";
 import { redirect } from "next/navigation";
 
 export async function signupAction(

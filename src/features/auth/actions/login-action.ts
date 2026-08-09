@@ -1,7 +1,7 @@
 "use server";
 
-import { loginWithEmailPassword } from "@/features/auth/lib/services/login-service";
-import type { AuthFormResult } from "@/features/auth/types/auth-form-result";
+import { loginWithEmailPassword } from "@/features/auth/server/login-service";
+import type { AuthFormResult } from "@/features/auth/model/auth-form-result";
 import { redirect } from "next/navigation";
 
 export async function loginAction(

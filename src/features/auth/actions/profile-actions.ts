@@ -1,8 +1,8 @@
 "use server";
 
-import { updateProfileDisplayName } from "@/features/auth/lib/services/profile-service";
-import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
-import { groupChartsPath, groupDetailPath } from "@/lib/routes";
+import { updateProfileDisplayName } from "@/features/auth/server/profile-service";
+import { requireAuthForAction } from "@/features/auth/server/require-auth-for-action";
+import { groupChartsPath, groupDetailPath } from "@/shared/navigation/routes";
 import { revalidatePath } from "next/cache";
 
 export async function updateProfileDisplayNameAction(

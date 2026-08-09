@@ -3,10 +3,10 @@
 import {
   isAuthActionError,
   requireAuthForAction,
-} from "@/features/auth/lib/require-auth-for-action";
-import { selectMembershipRole } from "@/features/groups/lib/repositories/group-detail-repository";
-import * as groupWriteRepo from "@/features/groups/lib/repositories/group-write-repository";
-import { ROUTES } from "@/lib/routes";
+} from "@/features/auth/server/require-auth-for-action";
+import { selectMembershipRole } from "@/features/groups/repositories/group-detail-repository";
+import * as groupWriteRepo from "@/features/groups/repositories/group-write-repository";
+import { ROUTES } from "@/shared/navigation/routes";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
