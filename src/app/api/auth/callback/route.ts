@@ -4,12 +4,12 @@ import { cookies } from "next/headers";
 import {
   OAUTH_SIGNUP_DISPLAY_NAME_COOKIE,
   OAUTH_SIGNUP_DISPLAY_NAME_MAX,
-} from "@/features/auth/lib/oauth-display-name-cookie";
-import { appendNextQuery } from "@/features/auth/lib/build-auth-next-query";
-import * as authRepo from "@/features/auth/lib/repositories/auth-repository";
-import * as profileRepo from "@/features/auth/lib/repositories/profile-repository";
-import { safeAuthRedirectPath } from "@/lib/auth-redirect";
-import { ROUTES } from "@/lib/routes";
+} from "@/features/auth/model/oauth-display-name-cookie";
+import { appendNextQuery } from "@/features/auth/model/build-auth-next-query";
+import * as authRepo from "@/features/auth/repositories/auth-repository";
+import * as profileRepo from "@/features/auth/repositories/profile-repository";
+import { safeAuthRedirectPath } from "@/shared/navigation/auth-redirect";
+import { ROUTES } from "@/shared/navigation/routes";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

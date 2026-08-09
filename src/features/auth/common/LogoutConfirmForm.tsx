@@ -1,0 +1,144 @@
+"use client";
+
+import { logoutAction } from "@/features/auth/actions/logout-action";
+import getFirstAuthErrorMessage from "@/features/auth/model/auth-error-message";
+import type { AuthFormResult } from "@/features/auth/model/auth-form-result";
+import { BottomSheetDialog } from "@/shared/components/BottomSheetDialog";
+import { PendingButton } from "@/shared/components/PendingButton";
+import { LogOut, X } from "lucide-react";
+import {
+  useCallback,
+  useId,
+  useState,
+  type ReactNode,
+} from "react";
+import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
+
+type Props = {
+  /** トリガー直下のラッパー（例: display 調整） */
+  className?: string;
+  /** 開くボタン（variant 既定を上書き） */
+  buttonClassName?: string;
+  /** false のときアイコンなし（狭いヘッダー用） */
+  showIcon?: boolean;
+  children?: ReactNode;
+};
+
+const initialState: AuthFormResult = {
+  ok: true,
+  message: "",
+};
+
+const defaultButtonClass =
+  "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-2xl px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-400/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:scale-[0.98] motion-reduce:active:scale-100";
+
+function LogoutFormFields({
+  titleId,
+  onClose,
+  errorMessage,
+}: {
+  titleId: string;
+  onClose: () => void;
+  errorMessage: string | null;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <h2 id={titleId} className="text-base font-black text-slate-900">
+          ログアウトしますか？
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={pending}
+          className="shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:pointer-events-none disabled:opacity-50"
+          aria-label="閉じる"
+        >
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+      </div>
+
+      {errorMessage ? (
+        <p className="mb-4 rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+          {errorMessage}
+        </p>
+      ) : null}
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={pending}
+          className="btn-secondary order-2 w-full sm:order-1 sm:w-auto"
+        >
+          キャンセル
+        </button>
+        <PendingButton
+          type="submit"
+          pending={pending}
+          pendingLabel="ログアウト中…"
+          className="btn-primary order-1 w-full sm:order-2 sm:w-auto"
+        >
+          ログアウト
+        </PendingButton>
+      </div>
+    </>
+  );
+}
+
+/**
+ * 誤タップ防止のため、POST 前にアプリ内モーダルで確認する。
+ */
+export function LogoutConfirmForm({
+  className,
+  buttonClassName = defaultButtonClass,
+  showIcon = true,
+  children,
+}: Props) {
+  const titleId = useId();
+  const [open, setOpen] = useState(false);
+  const [state, formAction] = useActionState(logoutAction, initialState);
+  const errorMessage = getFirstAuthErrorMessage(state);
+
+  const close = useCallback(() => setOpen(false), []);
+
+  return (
+    <>
+      <div className={className}>
+        <button
+          type="button"
+          className={buttonClassName}
+          onClick={() => setOpen(true)}
+        >
+          {showIcon ? (
+            <LogOut
+              className="h-4 w-4 shrink-0 opacity-80"
+              strokeWidth={2}
+              aria-hidden
+            />
+          ) : null}
+          {children ?? "ログアウト"}
+        </button>
+      </div>
+      <BottomSheetDialog
+        open={open}
+        onClose={close}
+        titleId={titleId}
+        title="ログアウトしますか？"
+        zIndex={220}
+        compact
+      >
+        <form action={formAction}>
+          <LogoutFormFields
+            titleId={titleId}
+            onClose={close}
+            errorMessage={errorMessage}
+          />
+        </form>
+      </BottomSheetDialog>
+    </>
+  );
+}

@@ -4,14 +4,14 @@ import {
   groupJoinPathWithError,
   groupJoinPathWithToken,
   groupJoinPathWithTokenAndError,
-} from "@/features/groups/lib/group-invite-path";
+} from "@/features/groups/invite/group-invite-path";
 import {
   isAuthActionError,
   requireAuthForAction,
-} from "@/features/auth/lib/require-auth-for-action";
-import { selectMembershipRole } from "@/features/groups/lib/repositories/group-detail-repository";
-import * as groupWriteRepo from "@/features/groups/lib/repositories/group-write-repository";
-import { groupDetailPath } from "@/lib/routes";
+} from "@/features/auth/server/require-auth-for-action";
+import { selectMembershipRole } from "@/features/groups/repositories/group-detail-repository";
+import * as groupWriteRepo from "@/features/groups/repositories/group-write-repository";
+import { groupDetailPath } from "@/shared/navigation/routes";
 import { createHash, randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

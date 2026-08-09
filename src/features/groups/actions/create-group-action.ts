@@ -1,8 +1,8 @@
 "use server";
 
-import { requireAuthForAction } from "@/features/auth/lib/require-auth-for-action";
-import * as groupWriteRepo from "@/features/groups/lib/repositories/group-write-repository";
-import { ROUTES } from "@/lib/routes";
+import { requireAuthForAction } from "@/features/auth/server/require-auth-for-action";
+import * as groupWriteRepo from "@/features/groups/repositories/group-write-repository";
+import { ROUTES } from "@/shared/navigation/routes";
 import { redirect } from "next/navigation";
 
 export async function createGroupAction(formData: FormData) {

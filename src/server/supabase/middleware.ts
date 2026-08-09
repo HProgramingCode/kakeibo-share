@@ -1,9 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { authPathWithNext } from "@/features/auth/lib/build-auth-next-query";
-import { safeAuthRedirectPath } from "@/lib/auth-redirect";
-import { ROUTES } from "@/lib/routes";
+import { authPathWithNext } from "@/features/auth/model/build-auth-next-query";
+import { safeAuthRedirectPath } from "@/shared/navigation/auth-redirect";
+import { ROUTES } from "@/shared/navigation/routes";
 import type { CookieToSet } from "@/server/supabase/cookie-types";
 
 export async function updateSession(request: NextRequest) {

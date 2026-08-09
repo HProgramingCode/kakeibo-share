@@ -1,8 +1,8 @@
 "use server";
 
-import { signOutSession } from "@/features/auth/lib/services/logout-service";
-import type { AuthFormResult } from "@/features/auth/types/auth-form-result";
-import { ROUTES } from "@/lib/routes";
+import { signOutSession } from "@/features/auth/server/logout-service";
+import type { AuthFormResult } from "@/features/auth/model/auth-form-result";
+import { ROUTES } from "@/shared/navigation/routes";
 import { redirect } from "next/navigation";
 
 export async function logoutAction(
